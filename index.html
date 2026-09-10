@@ -123,6 +123,15 @@
     font-size: 14px;
   }
   .log-entry:last-child { border-bottom: none; }
+  .log-entry-wrap { border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .log-entry-wrap:last-child { border-bottom: none; }
+  .log-entry-wrap .log-entry { border-bottom: none; }
+  .log-note {
+    font-size: 12.5px;
+    color: var(--muted);
+    padding: 0 0 8px;
+    font-style: italic;
+  }
   .log-tag {
     font-size: 12px;
     padding: 2px 8px;
@@ -225,6 +234,25 @@
     margin-bottom: 20px;
     color: var(--text);
   }
+  .modal-note-label {
+    text-align: left;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .modal-note {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    color: var(--text);
+    font-size: 14px;
+    font-family: inherit;
+    padding: 10px 12px;
+    resize: none;
+    margin-bottom: 18px;
+  }
+  .modal-note:focus { outline: 1px solid var(--accent); }
   .modal-box button {
     background: var(--accent);
     color: #0e1613;
@@ -279,7 +307,7 @@
   </div>
 
   <div class="card">
-    <div class="log-title">Recent check-ins</div>
+    <div class="log-title">Today's check-ins</div>
     <div id="log"><div class="empty">No entries yet — log your first check-in above.</div></div>
   </div>
 
@@ -292,7 +320,9 @@
   <div class="modal-box">
     <div class="modal-icon">A slip, not a failure</div>
     <div class="modal-text" id="adviceText"></div>
-    <button onclick="closeAdvice()">Got it</button>
+    <div class="modal-note-label">What triggered it? (optional)</div>
+    <textarea class="modal-note" id="triggerNote" rows="2" placeholder="e.g. felt interrupted, wanted to correct someone..."></textarea>
+    <button onclick="closeAdvice()">Save & close</button>
   </div>
 </div>
 
@@ -420,20 +450,25 @@ window.addEventListener('error', (e) => {
 function logEntry(type) {
   try {
     const now = new Date();
-    data.entries.unshift({ type, ts: now.toISOString() });
+    const entry = { type, ts: now.toISOString() };
+    if (type === 'slip') entry.note = '';
+    data.entries.unshift(entry);
     data.entries = data.entries.slice(0, 200);
     showToast(type === 'good' ? 'Logged: stayed quiet' : type === 'observe' ? 'Logged: observed' : 'Logged: slipped up');
     saveData();
     render();
     if (type === 'slip') {
-      showAdvice();
+      showAdvice(entry);
     }
   } catch (err) {
     showError(err.message);
   }
 }
 
-function showAdvice() {
+let pendingSlipEntry = null;
+
+function showAdvice(entry) {
+  pendingSlipEntry = entry;
   let idx;
   if (adviceList.length === 1) {
     idx = 0;
@@ -444,10 +479,18 @@ function showAdvice() {
   }
   lastAdviceIndex = idx;
   document.getElementById('adviceText').textContent = adviceList[idx];
+  document.getElementById('triggerNote').value = '';
   document.getElementById('adviceModal').classList.add('show');
 }
 
 function closeAdvice() {
+  const noteVal = document.getElementById('triggerNote').value.trim();
+  if (pendingSlipEntry) {
+    pendingSlipEntry.note = noteVal;
+    saveData();
+    render();
+    pendingSlipEntry = null;
+  }
   document.getElementById('adviceModal').classList.remove('show');
 }
 
@@ -528,17 +571,18 @@ function render() {
   renderReport();
 
   const logEl = document.getElementById('log');
-  if (data.entries.length === 0) {
-    logEl.innerHTML = '<div class="empty">No entries yet — log your first check-in above.</div>';
+  if (todayEntries.length === 0) {
+    logEl.innerHTML = '<div class="empty">No check-ins yet today — log your first one above.</div>';
     return;
   }
-  logEl.innerHTML = data.entries.slice(0, 15).map(e => {
+  logEl.innerHTML = todayEntries.slice(0, 30).map(e => {
     const dt = new Date(e.ts);
     const timeStr = pad(dt.getHours()) + ':' + pad(dt.getMinutes());
     const dateStr = dt.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
     const tagClass = e.type === 'good' ? 'tag-good' : (e.type === 'observe' ? 'tag-observe' : 'tag-slip');
     const tagText = e.type === 'good' ? 'Stayed quiet' : (e.type === 'observe' ? 'Observed' : 'Slipped up');
-    return `<div class="log-entry"><span>${dateStr}, ${timeStr}</span><span class="log-tag ${tagClass}">${tagText}</span></div>`;
+    const noteHtml = (e.type === 'slip' && e.note) ? `<div class="log-note">${e.note.replace(/</g, '&lt;')}</div>` : '';
+    return `<div class="log-entry-wrap"><div class="log-entry"><span>${dateStr}, ${timeStr}</span><span class="log-tag ${tagClass}">${tagText}</span></div>${noteHtml}</div>`;
   }).join('');
 }
 
