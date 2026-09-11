@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Personal Ledger</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+:root{
+  --paper:#E8E0C9;
+  --paper-light:#F6F1E2;
+  --ink:#22314A;
+  --ink-soft:#5B6478;
+  --rule:#C6BB9C;
+  --rule-red:#9C3B34;
+  --green:#33513B;
+  --green-tint:#DCE4DA;
+  --amber:#A8672A;
+}
+
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:'Source Serif 4', serif;
+  padding:18px 14px 60px;
+}
+
+.ledger{
+  max-width:640px;
+  margin:0 auto;
+  background:var(--paper-light);
+  border:1px solid var(--rule);
+  position:relative;
+  padding-left:26px;
+}
+.ledger::before{
+  content:"";
+  position:absolute;
+  left:20px;
+  top:0;
+  bottom:0;
+  width:1px;
+  background:var(--rule-red);
+  opacity:0.55;
+}
+
+.ledger-head{
+  padding:22px 18px 14px 8px;
+  border-bottom:2px solid var(--ink);
+}
+.stamp{
+  font-size:22px;
+  font-weight:700;
+  letter-spacing:0.3px;
+}
+.stamp-sub{
+  font-size:12.5px;
+  color:var(--ink-soft);
+  margin-top:2px;
+}
+.month-nav{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  margin-top:12px;
+  font-family:'IBM Plex Mono', monospace;
+  font-size:14px;
+}
+.month-nav button{
+  background:none;
+  border:1px solid var(--ink);
+  color:var(--ink);
+  width:26px;
+  height:26px;
+  cursor:pointer;
+  font-size:15px;
+  line-height:1;
+}
+.month-nav button:hover{background:var(--ink);color:var(--paper-light);}
+.month-nav span{min-width:150px;}
+
+section{
+  padding:16px 18px 16px 8px;
+  border-bottom:1px solid var(--rule);
+}
+
+h2{
+  font-size:13px;
+  font-weight:600;
+  margin:0 0 12px;
+  color:var(--ink-soft);
+}
+.section-note{font-size:11.5px;color:var(--ink-soft);margin:-6px 0 12px;}
+
+/* Budgets */
+.budget-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px 14px;
+}
+.budget-grid label{display:block;font-size:11px;color:var(--ink-soft);margin-bottom:4px;}
+.budget-grid input{
+  width:100%;font-family:'IBM Plex Mono', monospace;font-size:14px;
+  padding:7px 8px;border:1px solid var(--rule);background:var(--paper-light);color:var(--ink);
+}
+.budget-grid input:focus{outline:2px solid var(--ink);outline-offset:1px;}
+.budget-grid .full{grid-column:1/-1;}
+.save-budgets{
+  grid-column:1/-1;
+  background:var(--ink);color:var(--paper-light);border:none;padding:9px;
+  font-family:'Source Serif 4', serif;font-weight:600;font-size:13px;cursor:pointer;margin-top:2px;
+}
+.save-budgets:hover{background:var(--rule-red);}
+
+/* Health badge */
+.health-badge{
+  display:inline-flex;align-items:center;gap:7px;
+  font-size:12.5px;color:var(--ink-soft);margin-bottom:14px;
+  border:1px solid var(--rule);padding:5px 10px;
+}
+.health-badge .dot{width:8px;height:8px;border-radius:50%;background:var(--ink-soft);flex:none;}
+.health-badge.good .dot{background:var(--green);}
+.health-badge.warn .dot{background:var(--amber);}
+.health-badge.bad .dot{background:var(--rule-red);}
+.health-badge.good{color:var(--green);border-color:var(--green);}
+.health-badge.warn{color:var(--amber);border-color:var(--amber);}
+.health-badge.bad{color:var(--rule-red);border-color:var(--rule-red);}
+
+.summary-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px 20px;
+}
+.summary-cell .label{
+  font-size:11.5px;
+  color:var(--ink-soft);
+}
+.summary-cell .value{
+  font-family:'IBM Plex Mono', monospace;
+  font-size:19px;
+  font-weight:600;
+  margin-top:2px;
+}
+.value.neg{color:var(--rule-red);}
+.value.pos{color:var(--green);}
+
+.progress-wrap{margin-top:14px;}
+.progress-wrap:first-child{margin-top:0;}
+.progress-wrap .label-row{
+  display:flex;
+  justify-content:space-between;
+  font-size:12.5px;
+  color:var(--ink-soft);
+  margin-bottom:6px;
+}
+.progress-wrap .label-row span:last-child{font-family:'IBM Plex Mono', monospace;color:var(--ink);}
+.progress-track{
+  height:8px;
+  background:var(--paper);
+  border:1px solid var(--rule);
+}
+.progress-fill{height:100%;background:var(--green);}
+.progress-fill.warn{background:var(--amber);}
+.progress-fill.over{background:var(--rule-red);}
+.progress-note{font-size:11.5px;color:var(--ink-soft);margin-top:6px;}
+
+.entry-form{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+.entry-form .full{grid-column:1/-1;}
+label{
+  display:block;
+  font-size:11px;
+  color:var(--ink-soft);
+  margin-bottom:4px;
+}
+input, select{
+  width:100%;
+  font-family:'IBM Plex Mono', monospace;
+  font-size:14px;
+  padding:7px 8px;
+  border:1px solid var(--rule);
+  background:var(--paper-light);
+  color:var(--ink);
+}
+input:focus, select:focus{outline:2px solid var(--ink);outline-offset:1px;}
+button.primary{
+  grid-column:1/-1;
+  background:var(--ink);
+  color:var(--paper-light);
+  border:none;
+  padding:10px;
+  font-family:'Source Serif 4', serif;
+  font-size:14px;
+  font-weight:600;
+  cursor:pointer;
+  margin-top:2px;
+}
+button.primary:hover{background:var(--rule-red);}
+button.primary.editing{background:var(--green);}
+.cancel-edit{
+  grid-column:1/-1;
+  background:none;border:none;color:var(--ink-soft);
+  font-family:'Source Serif 4', serif;font-size:12.5px;
+  text-decoration:underline;cursor:pointer;padding:2px 0;
+}
+
+.check-row{
+  display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-soft);
+}
+.check-row input{width:auto;}
+
+.toolbar{display:flex;gap:8px;margin-bottom:12px;}
+.toolbar input{flex:1;}
+.toolbar button{
+  border:1px solid var(--ink);background:none;color:var(--ink);cursor:pointer;
+  font-family:'Source Serif 4', serif;font-size:12.5px;padding:0 10px;white-space:nowrap;
+}
+.toolbar button:hover{background:var(--ink);color:var(--paper-light);}
+
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{
+  text-align:left;
+  font-size:11px;
+  color:var(--ink-soft);
+  font-weight:600;
+  padding-bottom:6px;
+  border-bottom:1px solid var(--ink);
+}
+td{
+  padding:7px 4px;
+  border-bottom:1px dashed var(--rule);
+  font-family:'IBM Plex Mono', monospace;
+}
+td.amt{text-align:right;}
+td.note-col{font-family:'Source Serif 4', serif;font-size:12.5px;color:var(--ink-soft);}
+.auto-tag{font-size:9.5px;color:var(--ink-soft);border:1px solid var(--rule);padding:1px 4px;margin-left:4px;font-family:'IBM Plex Mono', monospace;}
+tr.row-savings td{color:var(--green);background:var(--green-tint);font-weight:600;}
+.del-btn, .edit-btn{
+  background:none;border:none;cursor:pointer;font-size:14px;
+  font-family:'Source Serif 4', serif;padding:0 3px;
+}
+.del-btn{color:var(--rule-red);}
+.edit-btn{color:var(--ink-soft);}
+tr.row-savings .del-btn{color:var(--rule-red);}
+.empty-row td{
+  text-align:center;color:var(--ink-soft);font-family:'Source Serif 4', serif;
+  padding:16px 0;
+}
+
+/* Category consolidation table */
+.cat-table td, .cat-table th{font-family:'IBM Plex Mono', monospace;}
+.cat-table td.cat-name{font-family:'Source Serif 4', serif;display:flex;align-items:center;gap:7px;}
+.cat-swatch{width:9px;height:9px;flex:none;display:inline-block;}
+.cat-table td.amt, .cat-table td.pct{text-align:right;}
+
+.pie-wrap{display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:18px;}
+.pie{width:150px;height:150px;border-radius:50%;border:1px solid var(--rule);}
+.legend{font-size:11.5px;width:100%;max-width:260px;}
+.legend-item{display:flex;justify-content:space-between;align-items:center;gap:6px;margin-bottom:4px;}
+.legend-item .name{display:flex;align-items:center;gap:6px;}
+.swatch{width:9px;height:9px;flex:none;}
+
+details summary{
+  cursor:pointer;font-size:13px;font-weight:600;color:var(--ink-soft);
+  list-style:none;
+}
+details summary::-webkit-details-marker{display:none;}
+details summary::before{content:"+ ";}
+details[open] summary::before{content:"– ";}
+.settings-body{margin-top:14px;}
+.cat-list{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 12px;}
+.cat-chip{
+  border:1px solid var(--rule);padding:4px 8px;font-size:12px;
+  font-family:'IBM Plex Mono', monospace;display:flex;align-items:center;gap:6px;
+}
+.cat-chip.is-savings{color:var(--green);border-color:var(--green);}
+.cat-chip button{background:none;border:none;color:var(--rule-red);cursor:pointer;font-size:12px;padding:0;}
+.cat-add{display:flex;flex-direction:column;gap:8px;}
+.cat-add-row{display:flex;gap:8px;}
+.cat-add-row input{flex:1;}
+.cat-add-row button{
+  border:1px solid var(--ink);background:none;color:var(--ink);cursor:pointer;
+  font-family:'Source Serif 4', serif;font-size:13px;padding:0 12px;
+}
+.status-note{font-size:11px;color:var(--ink-soft);margin-top:16px;padding:0 18px 0 8px;}
+</style>
+</head>
+<body>
+
+<div class="ledger">
+  <div class="ledger-head">
+    <div class="stamp">Personal Ledger</div>
+    <div class="stamp-sub">Budgets, daily expenses, savings and category totals, kept the ledger way</div>
+    <div class="month-nav">
+      <button id="prevMonth">‹</button>
+      <span id="monthLabel">—</span>
+      <button id="nextMonth">›</button>
+    </div>
+  </div>
+
+  <section>
+    <details>
+      <summary>Budgets</summary>
+      <div class="settings-body">
+        <div class="budget-grid">
+          <div>
+            <label for="bMonthly">Monthly budget (₹)</label>
+            <input type="number" id="bMonthly" min="0" step="1">
+          </div>
+          <div>
+            <label for="bSavings">Savings budget (₹)</label>
+            <input type="number" id="bSavings" min="0" step="1">
+          </div>
+          <div>
+            <label for="bExpense">Expense budget (₹)</label>
+            <input type="number" id="bExpense" min="0" step="1">
+          </div>
+          <div>
+            <label for="bCreditCard">Credit card budget (₹)</label>
+            <input type="number" id="bCreditCard" min="0" step="1">
+          </div>
+          <label class="check-row full"><input type="checkbox" id="bRollover"> Carry unused expense budget into next month</label>
+          <button class="save-budgets" id="saveBudgetsBtn">Save budgets</button>
+        </div>
+      </div>
+    </details>
+  </section>
+
+  <section>
+    <div class="health-badge" id="healthBadge"><span class="dot"></span><span id="healthText">—</span></div>
+    <div class="summary-grid">
+      <div class="summary-cell">
+        <div class="label">Spent this month</div>
+        <div class="value" id="sumSpent">₹0</div>
+      </div>
+      <div class="summary-cell">
+        <div class="label">Expense budget left</div>
+        <div class="value" id="sumRemaining">₹0</div>
+      </div>
+      <div class="summary-cell">
+        <div class="label">Saved this month</div>
+        <div class="value" id="sumSavings">₹0</div>
+      </div>
+      <div class="summary-cell">
+        <div class="label">Credit card, this month</div>
+        <div class="value" id="sumCC">₹0</div>
+      </div>
+    </div>
+    <div class="section-note" id="rolloverNote" style="margin-top:12px;margin-bottom:0;"></div>
+  </section>
+
+  <section>
+    <div class="progress-wrap">
+      <div class="label-row"><span>Savings, toward budget</span><span id="savingsText">₹0 of ₹0</span></div>
+      <div class="progress-track"><div class="progress-fill" id="savingsFill" style="width:0%"></div></div>
+      <div class="progress-note" id="savingsNote"></div>
+    </div>
+    <div class="progress-wrap">
+      <div class="label-row"><span>Credit card budget</span><span id="ccText">₹0 of ₹0</span></div>
+      <div class="progress-track"><div class="progress-fill" id="ccFill" style="width:0%"></div></div>
+      <div class="progress-note" id="ccNote"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Daily expense log</h2>
+    <div class="section-note">Pick the "Savings" category for money set aside — it's tracked separately and highlighted below.</div>
+    <div class="entry-form">
+      <div>
+        <label for="fDate">Date</label>
+        <input type="date" id="fDate">
+      </div>
+      <div>
+        <label for="fCategory">Category</label>
+        <select id="fCategory"></select>
+      </div>
+      <div>
+        <label for="fAmount">Amount (₹)</label>
+        <input type="number" id="fAmount" min="0" step="1" placeholder="0">
+      </div>
+      <div>
+        <label for="fNote">Note</label>
+        <input type="text" id="fNote" placeholder="optional">
+      </div>
+      <label class="check-row full" id="recurRow"><input type="checkbox" id="fRecurring"> Repeat this every month</label>
+      <button class="primary full" id="addBtn">Add entry</button>
+      <button type="button" class="cancel-edit" id="cancelEditBtn" style="display:none;">Cancel edit</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>Entries this month</h2>
+    <div class="toolbar">
+      <input type="text" id="searchBox" placeholder="Search category or note">
+      <button id="exportCsvBtn">Export CSV</button>
+    </div>
+    <table>
+      <thead>
+        <tr><th>Date</th><th>Category</th><th class="note-col">Note</th><th style="text-align:right">Amount</th><th></th></tr>
+      </thead>
+      <tbody id="entryRows"></tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Expense categories</h2>
+    <div class="section-note">Consolidated against this month's expense budget — savings entries are tracked separately above, not counted here.</div>
+    <table class="cat-table">
+      <thead>
+        <tr><th>Category</th><th style="text-align:right">Amount</th><th style="text-align:right">% of spend</th></tr>
+      </thead>
+      <tbody id="catRows"></tbody>
+    </table>
+    <div class="pie-wrap">
+      <div class="pie" id="pieChart"></div>
+      <div class="legend" id="pieLegend"></div>
+    </div>
+  </section>
+
+  <section>
+    <details>
+      <summary>Recurring entries</summary>
+      <div class="settings-body">
+        <div class="section-note">These repeat automatically each month until removed here — removing one only stops future months, past entries stay.</div>
+        <div class="cat-list" id="recurList"></div>
+      </div>
+    </details>
+  </section>
+
+  <section>
+    <details>
+      <summary>Manage categories</summary>
+      <div class="settings-body">
+        <div class="cat-list" id="catList"></div>
+        <div class="cat-add">
+          <div class="cat-add-row">
+            <input type="text" id="newCat" placeholder="New category name">
+            <button id="addCatBtn">Add</button>
+          </div>
+          <label class="check-row"><input type="checkbox" id="newCatSavings"> This is a savings category</label>
+        </div>
+      </div>
+    </details>
+  </section>
+
+  <div class="status-note" id="statusNote">Loading your ledger…</div>
+</div>
+
+<script>
+const STORAGE_KEY = 'ledger-data';
+const PALETTE = ['#9C3B34','#33513B','#A8672A','#22314A','#6B7C93','#7A5238','#4F6D5C','#8A4F6B','#5B6478','#B4772A'];
+
+const DEFAULT_STATE = {
+  categories: [
+    {name:'Food', cc:false, savings:false},
+    {name:'Rent', cc:false, savings:false},
+    {name:'Transport', cc:false, savings:false},
+    {name:'Utilities', cc:false, savings:false},
+    {name:'Shopping', cc:false, savings:false},
+    {name:'Entertainment', cc:false, savings:false},
+    {name:'Health', cc:false, savings:false},
+    {name:'Credit Card', cc:true, savings:false},
+    {name:'Savings', cc:false, savings:true},
+    {name:'Other', cc:false, savings:false}
+  ],
+  budgets: {
+    monthly: 30000,
+    savings: 5000,
+    expense: 20000,
+    creditCard: 10000,
+    rollover: false
+  },
+  recurringTemplates: [],
+  entries: []
+};
+
+let state = null;
+let currentMonth = new Date();
+currentMonth.setDate(1);
+let editingId = null;
+let searchText = '';
+
+function monthKey(d){ return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0'); }
+function fmtMoney(n){ return '₹' + Math.round(n).toLocaleString('en-IN'); }
+function monthLabel(d){ return d.toLocaleDateString('en-IN', {month:'long', year:'numeric'}); }
+function catColor(name){
+  const idx = state.categories.findIndex(c => c.name === name);
+  return PALETTE[(idx < 0 ? 0 : idx) % PALETTE.length];
+}
+function isSavingsCat(name){
+  const c = state.categories.find(c => c.name === name);
+  return !!(c && c.savings);
+}
+
+function migrate(raw){
+  // Bring an older save up to the current shape
+  if(!raw.budgets){
+    raw.budgets = {
+      monthly: raw.monthlyBudget || DEFAULT_STATE.budgets.monthly,
+      savings: raw.savingsTarget || DEFAULT_STATE.budgets.savings,
+      expense: raw.expenseBudget || DEFAULT_STATE.budgets.expense,
+      creditCard: raw.creditCardCap || DEFAULT_STATE.budgets.creditCard
+    };
+  }
+  if(typeof raw.budgets.rollover === 'undefined') raw.budgets.rollover = false;
+  if(!raw.categories) raw.categories = DEFAULT_STATE.categories;
+  raw.categories.forEach(c => { if(typeof c.savings === 'undefined') c.savings = false; });
+  if(!raw.categories.some(c => c.savings)){
+    raw.categories.push({name:'Savings', cc:false, savings:true});
+  }
+  if(!raw.entries) raw.entries = [];
+  if(!raw.recurringTemplates) raw.recurringTemplates = [];
+  return raw;
+}
+
+async function loadState(){
+  try{
+    const res = await window.storage.get(STORAGE_KEY, false);
+    if(res && res.value){
+      state = migrate(JSON.parse(res.value));
+      setStatus('');
+      return;
+    }
+  }catch(e){
+    // key not found or storage error - fall through to defaults
+  }
+  state = JSON.parse(JSON.stringify(DEFAULT_STATE));
+  setStatus('Starting a fresh ledger.');
+}
+
+async function saveState(){
+  try{
+    const result = await window.storage.set(STORAGE_KEY, JSON.stringify(state), false);
+    if(!result){ setStatus('Could not save just now — try again.'); return false; }
+    return true;
+  }catch(e){
+    setStatus('Could not save just now — try again.');
+    return false;
+  }
+}
+
+function setStatus(msg){
+  document.getElementById('statusNote').textContent = msg || 'Saved on this device, tied to your account.';
+}
+
+function entriesForMonth(monthDate){
+  const key = monthKey(monthDate || currentMonth);
+  return state.entries.filter(e => e.date.slice(0,7) === key);
+}
+
+function getExpenseSpentForMonth(monthDate){
+  return entriesForMonth(monthDate).filter(e => !isSavingsCat(e.category)).reduce((s,e)=>s+e.amount,0);
+}
+
+function effectiveExpenseBudget(monthDate){
+  const base = state.budgets.expense || 0;
+  if(!state.budgets.rollover) return base;
+  const prev = new Date(monthDate.getFullYear(), monthDate.getMonth()-1, 1);
+  const prevSpent = getExpenseSpentForMonth(prev);
+  const carry = Math.max(base - prevSpent, 0);
+  return base + carry;
+}
+
+function ensureRecurringForMonth(monthDate){
+  const key = monthKey(monthDate);
+  let changed = false;
+  state.recurringTemplates.forEach(t=>{
+    const exists = state.entries.some(e => e.recurringId === t.id && e.date.slice(0,7) === key);
+    if(!exists){
+      const daysInMonth = new Date(monthDate.getFullYear(), monthDate.getMonth()+1, 0).getDate();
+      const day = Math.min(t.dayOfMonth, daysInMonth);
+      const dateStr = key + '-' + String(day).padStart(2,'0');
+      state.entries.push({
+        id: Date.now().toString(36)+Math.random().toString(36).slice(2,6),
+        date: dateStr, category: t.category, amount: t.amount, note: t.note,
+        recurringId: t.id, autoGenerated: true
+      });
+      changed = true;
+    }
+  });
+  return changed;
+}
+
+function populateCategorySelect(){
+  const sel = document.getElementById('fCategory');
+  const prev = sel.value;
+  sel.innerHTML = '';
+  state.categories.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c.name; opt.textContent = c.name;
+    sel.appendChild(opt);
+  });
+  if(prev) sel.value = prev;
+}
+
+function fillBudgetInputs(){
+  document.getElementById('bMonthly').value = state.budgets.monthly;
+  document.getElementById('bSavings').value = state.budgets.savings;
+  document.getElementById('bExpense').value = state.budgets.expense;
+  document.getElementById('bCreditCard').value = state.budgets.creditCard;
+  document.getElementById('bRollover').checked = !!state.budgets.rollover;
+}
+
+function render(){
+  document.getElementById('monthLabel').textContent = monthLabel(currentMonth);
+
+  const changed = ensureRecurringForMonth(currentMonth);
+  if(changed) saveState();
+
+  const monthEntries = entriesForMonth();
+  const savingsEntries = monthEntries.filter(e => isSavingsCat(e.category));
+  const expenseEntries = monthEntries.filter(e => !isSavingsCat(e.category));
+
+  const totalSpent = expenseEntries.reduce((s,e)=>s+e.amount,0);
+  const savingsSaved = savingsEntries.reduce((s,e)=>s+e.amount,0);
+  const ccCategories = new Set(state.categories.filter(c=>c.cc).map(c=>c.name));
+  const ccSpent = expenseEntries.filter(e=>ccCategories.has(e.category)).reduce((s,e)=>s+e.amount,0);
+
+  const expBudget = effectiveExpenseBudget(currentMonth);
+  const expenseLeft = expBudget - totalSpent;
+  const carryAmount = expBudget - (state.budgets.expense || 0);
+
+  document.getElementById('sumSpent').textContent = fmtMoney(totalSpent);
+  const remEl = document.getElementById('sumRemaining');
+  remEl.textContent = fmtMoney(expenseLeft);
+  remEl.className = 'value ' + (expenseLeft < 0 ? 'neg' : 'pos');
+  document.getElementById('sumSavings').textContent = fmtMoney(savingsSaved);
+  document.getElementById('sumCC').textContent = fmtMoney(ccSpent);
+
+  document.getElementById('rolloverNote').textContent = carryAmount > 0
+    ? 'Includes ' + fmtMoney(carryAmount) + ' rolled over from last month\'s unused expense budget.'
+    : '';
+
+  // savings progress
+  const sTarget = state.budgets.savings || 0;
+  const sPct = sTarget > 0 ? Math.min(savingsSaved/sTarget,1)*100 : 0;
+  document.getElementById('savingsFill').style.width = sPct + '%';
+  document.getElementById('savingsFill').className = 'progress-fill';
+  document.getElementById('savingsText').textContent = fmtMoney(savingsSaved) + ' of ' + fmtMoney(sTarget);
+  document.getElementById('savingsNote').textContent = sTarget > 0 && savingsSaved >= sTarget
+    ? 'Savings budget reached for this month.'
+    : (sTarget > 0 ? fmtMoney(Math.max(sTarget-savingsSaved,0)) + ' left to reach it.' : '');
+
+  // credit card progress
+  const cap = state.budgets.creditCard || 0;
+  const ccPct = cap > 0 ? Math.min(ccSpent/cap,1)*100 : 0;
+  const ccFill = document.getElementById('ccFill');
+  ccFill.style.width = ccPct + '%';
+  ccFill.className = 'progress-fill' + (ccSpent > cap ? ' over' : (ccPct > 80 ? ' warn' : ''));
+  document.getElementById('ccText').textContent = fmtMoney(ccSpent) + ' of ' + fmtMoney(cap);
+  document.getElementById('ccNote').textContent = ccSpent > cap
+    ? 'Over the credit card budget by ' + fmtMoney(ccSpent-cap) + '.'
+    : (ccPct > 80 ? 'Getting close to the credit card budget.' : '');
+
+  // health badge
+  const expensePct = expBudget > 0 ? totalSpent/expBudget : 0;
+  const ccRatio = cap > 0 ? ccSpent/cap : 0;
+  const savingsRatio = sTarget > 0 ? savingsSaved/sTarget : 1;
+  let level = 'good', text = 'On track';
+  if(expensePct > 1 || ccRatio > 1){ level='bad'; text='Over budget'; }
+  else if(expensePct >= 0.8 || ccRatio >= 0.8 || (sTarget > 0 && savingsRatio < 0.5)){ level='warn'; text='Watch your spending'; }
+  const badge = document.getElementById('healthBadge');
+  badge.className = 'health-badge ' + level;
+  document.getElementById('healthText').textContent = text;
+
+  // entries table (search-filtered for display only)
+  const q = searchText.trim().toLowerCase();
+  const displayEntries = q
+    ? monthEntries.filter(e => e.category.toLowerCase().includes(q) || (e.note||'').toLowerCase().includes(q))
+    : monthEntries;
+
+  const rows = document.getElementById('entryRows');
+  rows.innerHTML = '';
+  if(displayEntries.length === 0){
+    rows.innerHTML = '<tr class="empty-row"><td colspan="5">' + (monthEntries.length === 0 ? 'No entries yet this month.' : 'No entries match your search.') + '</td></tr>';
+  }else{
+    displayEntries.slice().sort((a,b)=>b.date.localeCompare(a.date)).forEach(e=>{
+      const tr = document.createElement('tr');
+      if(isSavingsCat(e.category)) tr.className = 'row-savings';
+      tr.innerHTML = `
+        <td>${e.date.slice(8,10)}/${e.date.slice(5,7)}</td>
+        <td>${e.category}</td>
+        <td class="note-col">${e.note ? e.note : ''}${e.autoGenerated ? ' <span class="auto-tag">auto</span>' : ''}</td>
+        <td class="amt">${fmtMoney(e.amount)}</td>
+        <td><button class="edit-btn" data-id="${e.id}" title="Edit">✎</button><button class="del-btn" data-id="${e.id}" title="Delete">✕</button></td>`;
+      rows.appendChild(tr);
+    });
+  }
+  rows.querySelectorAll('.del-btn').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      state.entries = state.entries.filter(e => e.id !== btn.dataset.id);
+      if(editingId === btn.dataset.id) exitEditMode();
+      await saveState();
+      render();
+    });
+  });
+  rows.querySelectorAll('.edit-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const e = state.entries.find(e => e.id === btn.dataset.id);
+      if(!e) return;
+      editingId = e.id;
+      document.getElementById('fDate').value = e.date;
+      document.getElementById('fCategory').value = e.category;
+      document.getElementById('fAmount').value = e.amount;
+      document.getElementById('fNote').value = e.note || '';
+      document.getElementById('recurRow').style.display = 'none';
+      const addBtn = document.getElementById('addBtn');
+      addBtn.textContent = 'Update entry';
+      addBtn.classList.add('editing');
+      document.getElementById('cancelEditBtn').style.display = '';
+    });
+  });
+
+  renderCategories(expenseEntries, totalSpent);
+  renderSettingsPanel();
+  renderRecurringPanel();
+}
+
+function exitEditMode(){
+  editingId = null;
+  document.getElementById('fDate').value = new Date().toISOString().slice(0,10);
+  populateCategorySelect();
+  document.getElementById('fCategory').selectedIndex = 0;
+  document.getElementById('fAmount').value = '';
+  document.getElementById('fNote').value = '';
+  document.getElementById('fRecurring').checked = false;
+  document.getElementById('recurRow').style.display = '';
+  const addBtn = document.getElementById('addBtn');
+  addBtn.textContent = 'Add entry';
+  addBtn.classList.remove('editing');
+  document.getElementById('cancelEditBtn').style.display = 'none';
+}
+
+function renderCategories(expenseEntries, totalSpent){
+  const byCategory = {};
+  expenseEntries.forEach(e=>{ byCategory[e.category] = (byCategory[e.category]||0) + e.amount; });
+  const sorted = Object.entries(byCategory).sort((a,b)=>b[1]-a[1]);
+
+  const catRows = document.getElementById('catRows');
+  catRows.innerHTML = '';
+  if(sorted.length === 0){
+    catRows.innerHTML = '<tr class="empty-row"><td colspan="3">Nothing logged yet.</td></tr>';
+  }else{
+    sorted.forEach(([name, amt])=>{
+      const pct = totalSpent > 0 ? (amt/totalSpent*100).toFixed(1) : '0.0';
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="cat-name"><span class="cat-swatch" style="background:${catColor(name)}"></span>${name}</td>
+        <td class="amt">${fmtMoney(amt)}</td>
+        <td class="pct">${pct}%</td>`;
+      catRows.appendChild(tr);
+    });
+  }
+
+  const pieEl = document.getElementById('pieChart');
+  const legendEl = document.getElementById('pieLegend');
+  legendEl.innerHTML = '';
+  if(sorted.length === 0 || totalSpent === 0){
+    pieEl.style.background = 'var(--paper)';
+  }else{
+    let acc = 0;
+    const stops = sorted.map(([name, amt])=>{
+      const start = acc/totalSpent*360;
+      acc += amt;
+      const end = acc/totalSpent*360;
+      return `${catColor(name)} ${start}deg ${end}deg`;
+    });
+    pieEl.style.background = `conic-gradient(${stops.join(',')})`;
+    sorted.forEach(([name, amt])=>{
+      const pct = (amt/totalSpent*100).toFixed(0);
+      const li = document.createElement('div');
+      li.className = 'legend-item';
+      li.innerHTML = `<span class="name"><span class="swatch" style="background:${catColor(name)}"></span>${name}</span><span>${pct}%</span>`;
+      legendEl.appendChild(li);
+    });
+  }
+}
+
+function renderSettingsPanel(){
+  const catList = document.getElementById('catList');
+  catList.innerHTML = '';
+  state.categories.forEach(c=>{
+    const chip = document.createElement('div');
+    chip.className = 'cat-chip' + (c.savings ? ' is-savings' : '');
+    const tag = c.savings ? ' (savings)' : (c.cc ? ' (card)' : '');
+    chip.innerHTML = `<span>${c.name}${tag}</span><button data-name="${c.name}" title="Remove">✕</button>`;
+    catList.appendChild(chip);
+  });
+  catList.querySelectorAll('button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      state.categories = state.categories.filter(c => c.name !== btn.dataset.name);
+      renderSettingsPanel();
+    });
+  });
+}
+
+function renderRecurringPanel(){
+  const list = document.getElementById('recurList');
+  list.innerHTML = '';
+  if(state.recurringTemplates.length === 0){
+    list.innerHTML = '<div class="section-note" style="margin:4px 0;">Nothing set up yet — check "Repeat this every month" when adding an entry.</div>';
+    return;
+  }
+  state.recurringTemplates.forEach(t=>{
+    const chip = document.createElement('div');
+    chip.className = 'cat-chip';
+    const noteText = t.note ? ' (' + t.note + ')' : '';
+    chip.innerHTML = `<span>${t.category} — ${fmtMoney(t.amount)}${noteText}, day ${t.dayOfMonth}</span><button data-id="${t.id}" title="Stop repeating">✕</button>`;
+    list.appendChild(chip);
+  });
+  list.querySelectorAll('button').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      state.recurringTemplates = state.recurringTemplates.filter(t => t.id !== btn.dataset.id);
+      await saveState();
+      renderRecurringPanel();
+    });
+  });
+}
+
+document.getElementById('prevMonth').addEventListener('click', ()=>{
+  currentMonth.setMonth(currentMonth.getMonth()-1);
+  render();
+});
+document.getElementById('nextMonth').addEventListener('click', ()=>{
+  currentMonth.setMonth(currentMonth.getMonth()+1);
+  render();
+});
+
+document.getElementById('searchBox').addEventListener('input', (e)=>{
+  searchText = e.target.value;
+  render();
+});
+
+document.getElementById('exportCsvBtn').addEventListener('click', ()=>{
+  const rows = [['Date','Category','Note','Amount']];
+  entriesForMonth().slice().sort((a,b)=>a.date.localeCompare(b.date)).forEach(e=>{
+    rows.push([e.date, e.category, (e.note||''), e.amount]);
+  });
+  const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv], {type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'ledger-' + monthKey(currentMonth) + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+});
+
+document.getElementById('addBtn').addEventListener('click', async ()=>{
+  const date = document.getElementById('fDate').value;
+  const category = document.getElementById('fCategory').value;
+  const amount = parseFloat(document.getElementById('fAmount').value);
+  const note = document.getElementById('fNote').value.trim();
+  if(!date || !category || !amount || amount <= 0){
+    setStatus('Enter a date, category and an amount above zero.');
+    return;
+  }
+
+  if(editingId){
+    const e = state.entries.find(e => e.id === editingId);
+    if(e){ e.date = date; e.category = category; e.amount = amount; e.note = note; }
+    exitEditMode();
+    const ok = await saveState();
+    if(ok) setStatus('');
+    render();
+    return;
+  }
+
+  const recurring = document.getElementById('fRecurring').checked;
+  const newEntry = { id: Date.now().toString(36)+Math.random().toString(36).slice(2,6), date, category, amount, note };
+
+  if(recurring){
+    const template = {
+      id: 'r'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),
+      category, amount, note, dayOfMonth: parseInt(date.split('-')[2], 10)
+    };
+    state.recurringTemplates.push(template);
+    newEntry.recurringId = template.id;
+  }
+  state.entries.push(newEntry);
+
+  document.getElementById('fAmount').value = '';
+  document.getElementById('fNote').value = '';
+  document.getElementById('fRecurring').checked = false;
+  const monthOfEntry = new Date(date);
+  currentMonth = new Date(monthOfEntry.getFullYear(), monthOfEntry.getMonth(), 1);
+  const ok = await saveState();
+  if(ok) setStatus('');
+  render();
+});
+
+document.getElementById('cancelEditBtn').addEventListener('click', ()=>{
+  exitEditMode();
+});
+
+document.getElementById('addCatBtn').addEventListener('click', ()=>{
+  const input = document.getElementById('newCat');
+  const savingsCheck = document.getElementById('newCatSavings');
+  const name = input.value.trim();
+  if(!name) return;
+  if(state.categories.some(c=>c.name.toLowerCase()===name.toLowerCase())) { input.value=''; return; }
+  state.categories.push({name, cc:false, savings: savingsCheck.checked});
+  input.value = '';
+  savingsCheck.checked = false;
+  populateCategorySelect();
+  renderSettingsPanel();
+});
+
+document.getElementById('saveBudgetsBtn').addEventListener('click', async ()=>{
+  state.budgets.monthly = parseFloat(document.getElementById('bMonthly').value) || 0;
+  state.budgets.savings = parseFloat(document.getElementById('bSavings').value) || 0;
+  state.budgets.expense = parseFloat(document.getElementById('bExpense').value) || 0;
+  state.budgets.creditCard = parseFloat(document.getElementById('bCreditCard').value) || 0;
+  state.budgets.rollover = document.getElementById('bRollover').checked;
+  const ok = await saveState();
+  setStatus(ok ? '' : 'Could not save budgets just now — try again.');
+  render();
+});
+
+(async function init(){
+  await loadState();
+  document.getElementById('fDate').value = new Date().toISOString().slice(0,10);
+  populateCategorySelect();
+  fillBudgetInputs();
+  render();
+})();
+</script>
+</body>
+</html>
