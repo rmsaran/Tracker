@@ -28,6 +28,15 @@ body{
   padding:18px 14px 60px;
 }
 
+.app-nav{
+  max-width:640px;margin:0 auto 10px;display:flex;gap:8px;align-items:center;
+  font-size:12px;font-family:'IBM Plex Mono', monospace;color:var(--ink-soft);
+}
+.app-nav a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--rule);}
+.app-nav a:hover{color:var(--rule-red);border-color:var(--rule-red);}
+.app-nav a.current{color:var(--rule-red);border-color:var(--rule-red);}
+.app-nav span{color:var(--rule);}
+
 .ledger{
   max-width:640px;
   margin:0 auto;
@@ -147,6 +156,12 @@ h2{
 .value.neg{color:var(--rule-red);}
 .value.pos{color:var(--green);}
 
+.text-btn{
+  background:none;border:1px solid var(--ink);color:var(--ink);cursor:pointer;
+  font-family:'Source Serif 4', serif;font-size:12.5px;padding:7px 12px;
+}
+.text-btn:hover{background:var(--ink);color:var(--paper-light);}
+
 .progress-wrap{margin-top:14px;}
 .progress-wrap:first-child{margin-top:0;}
 .progress-wrap .label-row{
@@ -215,8 +230,8 @@ button.primary.editing{background:var(--green);}
 }
 .check-row input{width:auto;}
 
-.toolbar{display:flex;gap:8px;margin-bottom:12px;}
-.toolbar input{flex:1;}
+.toolbar{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;}
+.toolbar input[type="text"]{flex:1;min-width:120px;}
 .toolbar button{
   border:1px solid var(--ink);background:none;color:var(--ink);cursor:pointer;
   font-family:'Source Serif 4', serif;font-size:12.5px;padding:0 10px;white-space:nowrap;
@@ -289,9 +304,28 @@ details[open] summary::before{content:"– ";}
   font-family:'Source Serif 4', serif;font-size:13px;padding:0 12px;
 }
 .status-note{font-size:11px;color:var(--ink-soft);margin-top:16px;padding:0 18px 0 8px;}
+
+@media print{
+  body{background:#fff;padding:0;}
+  .app-nav{display:none;}
+  .ledger{border:none;max-width:100%;padding-left:0;}
+  .ledger::before{display:none;}
+  .no-print{display:none !important;}
+  .month-nav button{display:none;}
+  #entriesTable th:last-child, #entriesTable td:last-child{display:none;}
+  details > summary{display:none;}
+  details > .settings-body{display:block !important;}
+  section{border-bottom:1px solid #ccc; padding:10px 0;}
+}
 </style>
 </head>
 <body>
+
+<div class="app-nav no-print">
+  <a href="index.html">Silent Practice</a>
+  <span>·</span>
+  <a href="about.html" class="current">Expense Tracker</a>
+</div>
 
 <div class="ledger">
   <div class="ledger-head">
@@ -304,7 +338,7 @@ details[open] summary::before{content:"– ";}
     </div>
   </div>
 
-  <section>
+  <section class="no-print">
     <details>
       <summary>Budgets</summary>
       <div class="settings-body">
@@ -353,6 +387,7 @@ details[open] summary::before{content:"– ";}
       </div>
     </div>
     <div class="section-note" id="rolloverNote" style="margin-top:12px;margin-bottom:0;"></div>
+    <button class="text-btn no-print" id="printBtn" style="margin-top:14px;">Print monthly summary</button>
   </section>
 
   <section>
@@ -368,7 +403,7 @@ details[open] summary::before{content:"– ";}
     </div>
   </section>
 
-  <section>
+  <section class="no-print">
     <h2>Daily expense log</h2>
     <div class="section-note">Pick the "Savings" category for money set aside — it's tracked separately and highlighted below.</div>
     <div class="entry-form">
@@ -396,11 +431,13 @@ details[open] summary::before{content:"– ";}
 
   <section>
     <h2>Entries this month</h2>
-    <div class="toolbar">
+    <div class="toolbar no-print">
       <input type="text" id="searchBox" placeholder="Search category or note">
       <button id="exportCsvBtn">Export CSV</button>
+      <button id="importCsvBtn">Import CSV</button>
+      <input type="file" id="importCsvInput" accept=".csv" style="display:none;">
     </div>
-    <table>
+    <table id="entriesTable">
       <thead>
         <tr><th>Date</th><th>Category</th><th class="note-col">Note</th><th style="text-align:right">Amount</th><th></th></tr>
       </thead>
@@ -423,7 +460,7 @@ details[open] summary::before{content:"– ";}
     </div>
   </section>
 
-  <section>
+  <section class="no-print">
     <details>
       <summary>Recurring entries</summary>
       <div class="settings-body">
@@ -433,7 +470,7 @@ details[open] summary::before{content:"– ";}
     </details>
   </section>
 
-  <section>
+  <section class="no-print">
     <details>
       <summary>Manage categories</summary>
       <div class="settings-body">
@@ -444,6 +481,20 @@ details[open] summary::before{content:"– ";}
             <button id="addCatBtn">Add</button>
           </div>
           <label class="check-row"><input type="checkbox" id="newCatSavings"> This is a savings category</label>
+        </div>
+      </div>
+    </details>
+  </section>
+
+  <section class="no-print">
+    <details>
+      <summary>Backup &amp; restore</summary>
+      <div class="settings-body">
+        <div class="section-note">Your data lives in this browser only. Download a backup now and then to keep a copy, or move it to another device.</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="text-btn" id="downloadBackupBtn">Download backup</button>
+          <button class="text-btn" id="restoreBackupBtn">Restore from backup</button>
+          <input type="file" id="restoreBackupInput" accept=".json" style="display:none;">
         </div>
       </div>
     </details>
@@ -499,7 +550,6 @@ function isSavingsCat(name){
 }
 
 function migrate(raw){
-  // Bring an older save up to the current shape
   if(!raw.budgets){
     raw.budgets = {
       monthly: raw.monthlyBudget || DEFAULT_STATE.budgets.monthly,
@@ -519,16 +569,17 @@ function migrate(raw){
   return raw;
 }
 
+/* ---- Storage: plain browser localStorage, works on GitHub Pages or anywhere else ---- */
 async function loadState(){
   try{
-    const res = await window.storage.get(STORAGE_KEY, false);
-    if(res && res.value){
-      state = migrate(JSON.parse(res.value));
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      state = migrate(JSON.parse(raw));
       setStatus('');
       return;
     }
   }catch(e){
-    // key not found or storage error - fall through to defaults
+    // localStorage unavailable (e.g. private browsing) - fall through to defaults
   }
   state = JSON.parse(JSON.stringify(DEFAULT_STATE));
   setStatus('Starting a fresh ledger.');
@@ -536,17 +587,16 @@ async function loadState(){
 
 async function saveState(){
   try{
-    const result = await window.storage.set(STORAGE_KEY, JSON.stringify(state), false);
-    if(!result){ setStatus('Could not save just now — try again.'); return false; }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     return true;
   }catch(e){
-    setStatus('Could not save just now — try again.');
+    setStatus('Could not save just now — your browser may be blocking storage.');
     return false;
   }
 }
 
 function setStatus(msg){
-  document.getElementById('statusNote').textContent = msg || 'Saved on this device, tied to your account.';
+  document.getElementById('statusNote').textContent = msg || 'Saved in this browser.';
 }
 
 function entriesForMonth(monthDate){
@@ -637,7 +687,6 @@ function render(){
     ? 'Includes ' + fmtMoney(carryAmount) + ' rolled over from last month\'s unused expense budget.'
     : '';
 
-  // savings progress
   const sTarget = state.budgets.savings || 0;
   const sPct = sTarget > 0 ? Math.min(savingsSaved/sTarget,1)*100 : 0;
   document.getElementById('savingsFill').style.width = sPct + '%';
@@ -647,7 +696,6 @@ function render(){
     ? 'Savings budget reached for this month.'
     : (sTarget > 0 ? fmtMoney(Math.max(sTarget-savingsSaved,0)) + ' left to reach it.' : '');
 
-  // credit card progress
   const cap = state.budgets.creditCard || 0;
   const ccPct = cap > 0 ? Math.min(ccSpent/cap,1)*100 : 0;
   const ccFill = document.getElementById('ccFill');
@@ -658,7 +706,6 @@ function render(){
     ? 'Over the credit card budget by ' + fmtMoney(ccSpent-cap) + '.'
     : (ccPct > 80 ? 'Getting close to the credit card budget.' : '');
 
-  // health badge
   const expensePct = expBudget > 0 ? totalSpent/expBudget : 0;
   const ccRatio = cap > 0 ? ccSpent/cap : 0;
   const savingsRatio = sTarget > 0 ? savingsSaved/sTarget : 1;
@@ -669,7 +716,6 @@ function render(){
   badge.className = 'health-badge ' + level;
   document.getElementById('healthText').textContent = text;
 
-  // entries table (search-filtered for display only)
   const q = searchText.trim().toLowerCase();
   const displayEntries = q
     ? monthEntries.filter(e => e.category.toLowerCase().includes(q) || (e.note||'').toLowerCase().includes(q))
@@ -837,6 +883,11 @@ document.getElementById('searchBox').addEventListener('input', (e)=>{
   render();
 });
 
+document.getElementById('printBtn').addEventListener('click', ()=>{
+  window.print();
+});
+
+/* ---- CSV export ---- */
 document.getElementById('exportCsvBtn').addEventListener('click', ()=>{
   const rows = [['Date','Category','Note','Amount']];
   entriesForMonth().slice().sort((a,b)=>a.date.localeCompare(b.date)).forEach(e=>{
@@ -852,6 +903,107 @@ document.getElementById('exportCsvBtn').addEventListener('click', ()=>{
   a.click();
   a.remove();
   URL.revokeObjectURL(url);
+});
+
+/* ---- CSV import ---- */
+function parseCSV(text){
+  const rows = [];
+  let cur = '', row = [], inQuotes = false;
+  for(let i=0;i<text.length;i++){
+    const ch = text[i];
+    if(inQuotes){
+      if(ch === '"'){
+        if(text[i+1] === '"'){ cur += '"'; i++; } else { inQuotes = false; }
+      } else cur += ch;
+    } else {
+      if(ch === '"') inQuotes = true;
+      else if(ch === ','){ row.push(cur); cur=''; }
+      else if(ch === '\n' || ch === '\r'){
+        if(ch === '\r' && text[i+1] === '\n') i++;
+        row.push(cur); cur=''; rows.push(row); row=[];
+      } else cur += ch;
+    }
+  }
+  if(cur.length>0 || row.length>0){ row.push(cur); rows.push(row); }
+  return rows.filter(r => !(r.length===1 && r[0].trim() === ''));
+}
+
+document.getElementById('importCsvBtn').addEventListener('click', ()=>{
+  document.getElementById('importCsvInput').click();
+});
+document.getElementById('importCsvInput').addEventListener('change', (e)=>{
+  const file = e.target.files[0];
+  if(!file){ return; }
+  const reader = new FileReader();
+  reader.onload = async ()=>{
+    const rows = parseCSV(reader.result);
+    if(rows.length === 0){ setStatus('That CSV looked empty.'); return; }
+    let start = 0;
+    const header = rows[0].map(h => (h||'').trim().toLowerCase());
+    if(header[0] === 'date') start = 1;
+    let added = 0, skipped = 0;
+    for(let i = start; i < rows.length; i++){
+      const r = rows[i];
+      if(r.length < 4){ skipped++; continue; }
+      const date = (r[0]||'').trim();
+      const categoryRaw = (r[1]||'').trim();
+      const note = (r[2]||'').trim();
+      const amount = parseFloat(r[3]);
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(date) || !categoryRaw || isNaN(amount) || amount <= 0){ skipped++; continue; }
+      let match = state.categories.find(c => c.name.toLowerCase() === categoryRaw.toLowerCase());
+      if(!match){
+        match = {name: categoryRaw, cc:false, savings:false};
+        state.categories.push(match);
+      }
+      state.entries.push({
+        id: Date.now().toString(36)+Math.random().toString(36).slice(2,6)+i,
+        date, category: match.name, amount, note
+      });
+      added++;
+    }
+    populateCategorySelect();
+    await saveState();
+    setStatus('Imported ' + added + ' entr' + (added===1?'y':'ies') + (skipped ? ', skipped ' + skipped + ' row(s).' : '.'));
+    render();
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+});
+
+/* ---- Backup / restore (whole app state as JSON) ---- */
+document.getElementById('downloadBackupBtn').addEventListener('click', ()=>{
+  const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'ledger-backup-' + new Date().toISOString().slice(0,10) + '.json';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+});
+document.getElementById('restoreBackupBtn').addEventListener('click', ()=>{
+  document.getElementById('restoreBackupInput').click();
+});
+document.getElementById('restoreBackupInput').addEventListener('change', (e)=>{
+  const file = e.target.files[0];
+  if(!file){ return; }
+  const reader = new FileReader();
+  reader.onload = async ()=>{
+    try{
+      const parsed = migrate(JSON.parse(reader.result));
+      state = parsed;
+      await saveState();
+      populateCategorySelect();
+      fillBudgetInputs();
+      render();
+      setStatus('Backup restored.');
+    }catch(err){
+      setStatus('That file could not be read as a backup.');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
 });
 
 document.getElementById('addBtn').addEventListener('click', async ()=>{
