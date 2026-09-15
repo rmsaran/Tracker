@@ -744,6 +744,8 @@ function renderTriggerSummary() {
   }
   el.innerHTML = `Common triggers this week: <b>${top.join(', ')}</b>`;
 }
+
+function computeStreak() {
   const days = new Set(data.entries.map(e => todayKey(e.ts)));
   let streak = 0;
   let cursor = new Date();
