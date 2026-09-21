@@ -1,7 +1,7 @@
 {
   "name": "Personal Ledger",
   "short_name": "Ledger",
-  "start_url": "./about.html",
+  "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "background_color": "#E8E0C9",
