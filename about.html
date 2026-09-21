@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Personal Ledger</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#22314A">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Ledger">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 
@@ -305,6 +311,24 @@ details[open] summary::before{content:"– ";}
 }
 .status-note{font-size:11px;color:var(--ink-soft);margin-top:16px;padding:0 18px 0 8px;}
 
+.profile-bar{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-top:12px;font-size:12px;color:var(--ink-soft);
+}
+.profile-bar strong{color:var(--ink);}
+
+.profile-gate{
+  position:fixed;inset:0;background:var(--paper);z-index:1000;
+  display:flex;align-items:center;justify-content:center;padding:20px;
+}
+.profile-gate-box{
+  max-width:400px;width:100%;background:var(--paper-light);border:1px solid var(--rule);padding:24px;
+}
+.profile-gate .cat-list{margin-top:14px;}
+.profile-gate .cat-chip{cursor:pointer;}
+.profile-gate .cat-chip:hover{background:var(--ink);color:var(--paper-light);border-color:var(--ink);}
+.profile-gate .cat-chip span[data-select]{flex:1;}
+
 @media print{
   body{background:#fff;padding:0;}
   .app-nav{display:none;}
@@ -321,6 +345,18 @@ details[open] summary::before{content:"– ";}
 </head>
 <body>
 
+<div class="profile-gate no-print" id="profileGate" style="display:none;">
+  <div class="profile-gate-box">
+    <div class="stamp" style="font-size:18px;">Who's tracking?</div>
+    <div class="section-note" style="margin-top:6px;margin-bottom:0;">Each name keeps its own separate budget, saved only on this device.</div>
+    <div class="cat-list" id="profileList"></div>
+    <div class="cat-add-row">
+      <input type="text" id="newProfileName" placeholder="Enter your name">
+      <button id="addProfileBtn">Continue</button>
+    </div>
+  </div>
+</div>
+
 <div class="app-nav no-print">
   <a href="index.html">Silent Practice</a>
   <span>·</span>
@@ -335,6 +371,10 @@ details[open] summary::before{content:"– ";}
       <button id="prevMonth">‹</button>
       <span id="monthLabel">—</span>
       <button id="nextMonth">›</button>
+    </div>
+    <div class="profile-bar">
+      <span>Tracking as <strong id="profileNameLabel">—</strong></span>
+      <button class="text-btn no-print" id="switchProfileBtn">Switch user</button>
     </div>
   </div>
 
@@ -505,6 +545,8 @@ details[open] summary::before{content:"– ";}
 
 <script>
 const STORAGE_KEY = 'ledger-data';
+const PROFILE_LIST_KEY = 'ledger-profile-list';
+const ACTIVE_PROFILE_KEY = 'ledger-active-profile';
 const PALETTE = ['#9C3B34','#33513B','#A8672A','#22314A','#6B7C93','#7A5238','#4F6D5C','#8A4F6B','#5B6478','#B4772A'];
 
 const DEFAULT_STATE = {
@@ -569,10 +611,40 @@ function migrate(raw){
   return raw;
 }
 
-/* ---- Storage: plain browser localStorage, works on GitHub Pages or anywhere else ---- */
+/* ---- Profiles: each name gets its own separate, isolated set of data on this device ---- */
+function getProfiles(){
+  try{ return JSON.parse(localStorage.getItem(PROFILE_LIST_KEY)) || []; }catch(e){ return []; }
+}
+function saveProfiles(list){
+  try{ localStorage.setItem(PROFILE_LIST_KEY, JSON.stringify(list)); }catch(e){}
+}
+function storageKeyFor(name){
+  return 'ledger-data::' + name;
+}
+function getActiveProfile(){
+  return localStorage.getItem(ACTIVE_PROFILE_KEY) || '';
+}
+function setActiveProfile(name){
+  try{ localStorage.setItem(ACTIVE_PROFILE_KEY, name); }catch(e){}
+}
+function migrateLegacyIfNeeded(){
+  const profiles = getProfiles();
+  if(profiles.length === 0){
+    let legacy = null;
+    try{ legacy = localStorage.getItem(STORAGE_KEY); }catch(e){}
+    if(legacy){
+      const name = 'Me';
+      try{ localStorage.setItem(storageKeyFor(name), legacy); localStorage.removeItem(STORAGE_KEY); }catch(e){}
+      saveProfiles([name]);
+      setActiveProfile(name);
+    }
+  }
+}
+
+/* ---- Storage: plain browser localStorage, scoped to the active profile ---- */
 async function loadState(){
   try{
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(storageKeyFor(getActiveProfile()));
     if(raw){
       state = migrate(JSON.parse(raw));
       setStatus('');
@@ -582,12 +654,12 @@ async function loadState(){
     // localStorage unavailable (e.g. private browsing) - fall through to defaults
   }
   state = JSON.parse(JSON.stringify(DEFAULT_STATE));
-  setStatus('Starting a fresh ledger.');
+  setStatus('Starting a fresh ledger for ' + getActiveProfile() + '.');
 }
 
 async function saveState(){
   try{
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    localStorage.setItem(storageKeyFor(getActiveProfile()), JSON.stringify(state));
     return true;
   }catch(e){
     setStatus('Could not save just now — your browser may be blocking storage.');
@@ -1077,12 +1149,79 @@ document.getElementById('saveBudgetsBtn').addEventListener('click', async ()=>{
   render();
 });
 
-(async function init(){
+function renderProfileGate(){
+  const list = document.getElementById('profileList');
+  const profiles = getProfiles();
+  list.innerHTML = '';
+  if(profiles.length === 0){
+    list.innerHTML = '<div class="section-note" style="margin:4px 0;">No names yet — add yours below.</div>';
+  }
+  profiles.forEach(name=>{
+    const chip = document.createElement('div');
+    chip.className = 'cat-chip';
+    chip.innerHTML = `<span data-select="${name}">${name}</span><button data-remove="${name}" title="Remove this profile">✕</button>`;
+    list.appendChild(chip);
+  });
+  list.querySelectorAll('[data-select]').forEach(el=>{
+    el.addEventListener('click', ()=> chooseProfile(el.dataset.select));
+  });
+  list.querySelectorAll('[data-remove]').forEach(btn=>{
+    btn.addEventListener('click', (ev)=>{
+      ev.stopPropagation();
+      const name = btn.dataset.remove;
+      if(confirm('Remove "' + name + '" and all of their data from this device? This cannot be undone.')){
+        try{ localStorage.removeItem(storageKeyFor(name)); }catch(e){}
+        saveProfiles(getProfiles().filter(p => p !== name));
+        if(getActiveProfile() === name) setActiveProfile('');
+        renderProfileGate();
+      }
+    });
+  });
+}
+
+async function chooseProfile(name){
+  const profiles = getProfiles();
+  if(!profiles.includes(name)){
+    profiles.push(name);
+    saveProfiles(profiles);
+  }
+  setActiveProfile(name);
+  document.getElementById('profileGate').style.display = 'none';
+  document.getElementById('profileNameLabel').textContent = name;
   await loadState();
   document.getElementById('fDate').value = new Date().toISOString().slice(0,10);
   populateCategorySelect();
   fillBudgetInputs();
   render();
+}
+
+document.getElementById('addProfileBtn').addEventListener('click', ()=>{
+  const input = document.getElementById('newProfileName');
+  const name = input.value.trim();
+  if(!name) return;
+  input.value = '';
+  chooseProfile(name);
+});
+
+document.getElementById('switchProfileBtn').addEventListener('click', ()=>{
+  renderProfileGate();
+  document.getElementById('profileGate').style.display = 'flex';
+});
+
+(async function init(){
+  migrateLegacyIfNeeded();
+  const active = getActiveProfile();
+  if(active){
+    document.getElementById('profileNameLabel').textContent = active;
+    await loadState();
+    document.getElementById('fDate').value = new Date().toISOString().slice(0,10);
+    populateCategorySelect();
+    fillBudgetInputs();
+    render();
+  }else{
+    renderProfileGate();
+    document.getElementById('profileGate').style.display = 'flex';
+  }
 })();
 </script>
 </body>
