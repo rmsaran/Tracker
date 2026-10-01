@@ -386,10 +386,6 @@ details[open] summary::before{content:"– ";}
         <div class="label">Credit card, this month</div>
         <div class="value" id="sumCC">₹0</div>
       </div>
-      <div class="summary-cell">
-        <div class="label">Monthly budget left</div>
-        <div class="value" id="sumMonthlyLeft">₹0</div>
-      </div>
     </div>
     <div class="section-note" id="rolloverNote" style="margin-top:12px;margin-bottom:0;"></div>
     <button class="text-btn no-print" id="printBtn" style="margin-top:14px;">Print monthly summary</button>
@@ -705,11 +701,6 @@ function render(){
   remEl.className = 'value ' + (expenseLeft < 0 ? 'neg' : 'pos');
   document.getElementById('sumSavings').textContent = fmtMoney(savingsSaved);
   document.getElementById('sumCC').textContent = fmtMoney(ccSpent);
-
-  const monthlyLeft = (state.budgets.monthly || 0) - totalSpent;
-  const monthlyLeftEl = document.getElementById('sumMonthlyLeft');
-  monthlyLeftEl.textContent = fmtMoney(monthlyLeft);
-  monthlyLeftEl.className = 'value ' + (monthlyLeft < 0 ? 'neg' : 'pos');
 
   document.getElementById('rolloverNote').textContent = carryAmount > 0
     ? 'Includes ' + fmtMoney(carryAmount) + ' rolled over from last month\'s unused expense budget.'
