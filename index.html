@@ -94,7 +94,8 @@ body{
   font-size:15px;
   line-height:1;
 }
-.month-nav button:hover{background:var(--ink);color:var(--paper-light);}
+.month-nav button:hover:not(:disabled){background:var(--ink);color:var(--paper-light);}
+.month-nav button:disabled{opacity:0.3;cursor:not-allowed;}
 .month-nav span{min-width:150px;}
 
 section{
@@ -311,24 +312,6 @@ details[open] summary::before{content:"– ";}
 }
 .status-note{font-size:11px;color:var(--ink-soft);margin-top:16px;padding:0 18px 0 8px;}
 
-.profile-bar{
-  display:flex;justify-content:space-between;align-items:center;
-  margin-top:12px;font-size:12px;color:var(--ink-soft);
-}
-.profile-bar strong{color:var(--ink);}
-
-.profile-gate{
-  position:fixed;inset:0;background:var(--paper);z-index:1000;
-  display:flex;align-items:center;justify-content:center;padding:20px;
-}
-.profile-gate-box{
-  max-width:400px;width:100%;background:var(--paper-light);border:1px solid var(--rule);padding:24px;
-}
-.profile-gate .cat-list{margin-top:14px;}
-.profile-gate .cat-chip{cursor:pointer;}
-.profile-gate .cat-chip:hover{background:var(--ink);color:var(--paper-light);border-color:var(--ink);}
-.profile-gate .cat-chip span[data-select]{flex:1;}
-
 @media print{
   body{background:#fff;padding:0;}
   .app-nav{display:none;}
@@ -345,18 +328,6 @@ details[open] summary::before{content:"– ";}
 </head>
 <body>
 
-<div class="profile-gate no-print" id="profileGate" style="display:none;">
-  <div class="profile-gate-box">
-    <div class="stamp" style="font-size:18px;">Who's tracking?</div>
-    <div class="section-note" style="margin-top:6px;margin-bottom:0;">Each name keeps its own separate budget, saved only on this device.</div>
-    <div class="cat-list" id="profileList"></div>
-    <div class="cat-add-row">
-      <input type="text" id="newProfileName" placeholder="Enter your name">
-      <button id="addProfileBtn">Continue</button>
-    </div>
-  </div>
-</div>
-
 <div class="ledger">
   <div class="ledger-head">
     <div class="stamp">Personal Ledger</div>
@@ -365,10 +336,6 @@ details[open] summary::before{content:"– ";}
       <button id="prevMonth">‹</button>
       <span id="monthLabel">—</span>
       <button id="nextMonth">›</button>
-    </div>
-    <div class="profile-bar">
-      <span>Tracking as <strong id="profileNameLabel">—</strong></span>
-      <button class="text-btn no-print" id="switchProfileBtn">Switch user</button>
     </div>
   </div>
 
@@ -418,6 +385,10 @@ details[open] summary::before{content:"– ";}
       <div class="summary-cell">
         <div class="label">Credit card, this month</div>
         <div class="value" id="sumCC">₹0</div>
+      </div>
+      <div class="summary-cell">
+        <div class="label">Monthly budget left</div>
+        <div class="value" id="sumMonthlyLeft">₹0</div>
       </div>
     </div>
     <div class="section-note" id="rolloverNote" style="margin-top:12px;margin-bottom:0;"></div>
@@ -539,8 +510,6 @@ details[open] summary::before{content:"– ";}
 
 <script>
 const STORAGE_KEY = 'ledger-data';
-const PROFILE_LIST_KEY = 'ledger-profile-list';
-const ACTIVE_PROFILE_KEY = 'ledger-active-profile';
 const PALETTE = ['#9C3B34','#33513B','#A8672A','#22314A','#6B7C93','#7A5238','#4F6D5C','#8A4F6B','#5B6478','#B4772A'];
 
 const DEFAULT_STATE = {
@@ -570,6 +539,7 @@ const DEFAULT_STATE = {
 let state = null;
 let currentMonth = new Date();
 currentMonth.setDate(1);
+const MIN_MONTH = new Date(currentMonth);
 let editingId = null;
 let searchText = '';
 
@@ -605,40 +575,26 @@ function migrate(raw){
   return raw;
 }
 
-/* ---- Profiles: each name gets its own separate, isolated set of data on this device ---- */
-function getProfiles(){
-  try{ return JSON.parse(localStorage.getItem(PROFILE_LIST_KEY)) || []; }catch(e){ return []; }
-}
-function saveProfiles(list){
-  try{ localStorage.setItem(PROFILE_LIST_KEY, JSON.stringify(list)); }catch(e){}
-}
-function storageKeyFor(name){
-  return 'ledger-data::' + name;
-}
-function getActiveProfile(){
-  return localStorage.getItem(ACTIVE_PROFILE_KEY) || '';
-}
-function setActiveProfile(name){
-  try{ localStorage.setItem(ACTIVE_PROFILE_KEY, name); }catch(e){}
-}
-function migrateLegacyIfNeeded(){
-  const profiles = getProfiles();
-  if(profiles.length === 0){
-    let legacy = null;
-    try{ legacy = localStorage.getItem(STORAGE_KEY); }catch(e){}
-    if(legacy){
-      const name = 'Me';
-      try{ localStorage.setItem(storageKeyFor(name), legacy); localStorage.removeItem(STORAGE_KEY); }catch(e){}
-      saveProfiles([name]);
-      setActiveProfile(name);
+/* ---- One-time migration: pull in data saved under the old per-profile scheme, if any ---- */
+function migrateProfileDataIfNeeded(){
+  try{
+    if(localStorage.getItem(STORAGE_KEY)) return; // already have plain data, nothing to do
+    const activeProfile = localStorage.getItem('ledger-active-profile');
+    if(activeProfile){
+      const scoped = localStorage.getItem('ledger-data::' + activeProfile);
+      if(scoped){
+        localStorage.setItem(STORAGE_KEY, scoped);
+      }
     }
+  }catch(e){
+    // localStorage unavailable - nothing to migrate
   }
 }
 
-/* ---- Storage: plain browser localStorage, scoped to the active profile ---- */
+/* ---- Storage: plain browser localStorage, works on GitHub Pages or anywhere else ---- */
 async function loadState(){
   try{
-    const raw = localStorage.getItem(storageKeyFor(getActiveProfile()));
+    const raw = localStorage.getItem(STORAGE_KEY);
     if(raw){
       state = migrate(JSON.parse(raw));
       setStatus('');
@@ -648,12 +604,12 @@ async function loadState(){
     // localStorage unavailable (e.g. private browsing) - fall through to defaults
   }
   state = JSON.parse(JSON.stringify(DEFAULT_STATE));
-  setStatus('Starting a fresh ledger for ' + getActiveProfile() + '.');
+  setStatus('Starting a fresh ledger.');
 }
 
 async function saveState(){
   try{
-    localStorage.setItem(storageKeyFor(getActiveProfile()), JSON.stringify(state));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     return true;
   }catch(e){
     setStatus('Could not save just now — your browser may be blocking storage.');
@@ -725,6 +681,7 @@ function fillBudgetInputs(){
 
 function render(){
   document.getElementById('monthLabel').textContent = monthLabel(currentMonth);
+  document.getElementById('prevMonth').disabled = monthKey(currentMonth) <= monthKey(MIN_MONTH);
 
   const changed = ensureRecurringForMonth(currentMonth);
   if(changed) saveState();
@@ -748,6 +705,11 @@ function render(){
   remEl.className = 'value ' + (expenseLeft < 0 ? 'neg' : 'pos');
   document.getElementById('sumSavings').textContent = fmtMoney(savingsSaved);
   document.getElementById('sumCC').textContent = fmtMoney(ccSpent);
+
+  const monthlyLeft = (state.budgets.monthly || 0) - totalSpent;
+  const monthlyLeftEl = document.getElementById('sumMonthlyLeft');
+  monthlyLeftEl.textContent = fmtMoney(monthlyLeft);
+  monthlyLeftEl.className = 'value ' + (monthlyLeft < 0 ? 'neg' : 'pos');
 
   document.getElementById('rolloverNote').textContent = carryAmount > 0
     ? 'Includes ' + fmtMoney(carryAmount) + ' rolled over from last month\'s unused expense budget.'
@@ -936,6 +898,7 @@ function renderRecurringPanel(){
 }
 
 document.getElementById('prevMonth').addEventListener('click', ()=>{
+  if(monthKey(currentMonth) <= monthKey(MIN_MONTH)) return;
   currentMonth.setMonth(currentMonth.getMonth()-1);
   render();
 });
@@ -1143,79 +1106,15 @@ document.getElementById('saveBudgetsBtn').addEventListener('click', async ()=>{
   render();
 });
 
-function renderProfileGate(){
-  const list = document.getElementById('profileList');
-  const profiles = getProfiles();
-  list.innerHTML = '';
-  if(profiles.length === 0){
-    list.innerHTML = '<div class="section-note" style="margin:4px 0;">No names yet — add yours below.</div>';
-  }
-  profiles.forEach(name=>{
-    const chip = document.createElement('div');
-    chip.className = 'cat-chip';
-    chip.innerHTML = `<span data-select="${name}">${name}</span><button data-remove="${name}" title="Remove this profile">✕</button>`;
-    list.appendChild(chip);
-  });
-  list.querySelectorAll('[data-select]').forEach(el=>{
-    el.addEventListener('click', ()=> chooseProfile(el.dataset.select));
-  });
-  list.querySelectorAll('[data-remove]').forEach(btn=>{
-    btn.addEventListener('click', (ev)=>{
-      ev.stopPropagation();
-      const name = btn.dataset.remove;
-      if(confirm('Remove "' + name + '" and all of their data from this device? This cannot be undone.')){
-        try{ localStorage.removeItem(storageKeyFor(name)); }catch(e){}
-        saveProfiles(getProfiles().filter(p => p !== name));
-        if(getActiveProfile() === name) setActiveProfile('');
-        renderProfileGate();
-      }
-    });
-  });
-}
-
-async function chooseProfile(name){
-  const profiles = getProfiles();
-  if(!profiles.includes(name)){
-    profiles.push(name);
-    saveProfiles(profiles);
-  }
-  setActiveProfile(name);
-  document.getElementById('profileGate').style.display = 'none';
-  document.getElementById('profileNameLabel').textContent = name;
+(async function init(){
+  migrateProfileDataIfNeeded();
   await loadState();
-  document.getElementById('fDate').value = new Date().toISOString().slice(0,10);
+  const dateInput = document.getElementById('fDate');
+  dateInput.value = new Date().toISOString().slice(0,10);
+  dateInput.min = monthKey(MIN_MONTH) + '-01';
   populateCategorySelect();
   fillBudgetInputs();
   render();
-}
-
-document.getElementById('addProfileBtn').addEventListener('click', ()=>{
-  const input = document.getElementById('newProfileName');
-  const name = input.value.trim();
-  if(!name) return;
-  input.value = '';
-  chooseProfile(name);
-});
-
-document.getElementById('switchProfileBtn').addEventListener('click', ()=>{
-  renderProfileGate();
-  document.getElementById('profileGate').style.display = 'flex';
-});
-
-(async function init(){
-  migrateLegacyIfNeeded();
-  const active = getActiveProfile();
-  if(active){
-    document.getElementById('profileNameLabel').textContent = active;
-    await loadState();
-    document.getElementById('fDate').value = new Date().toISOString().slice(0,10);
-    populateCategorySelect();
-    fillBudgetInputs();
-    render();
-  }else{
-    renderProfileGate();
-    document.getElementById('profileGate').style.display = 'flex';
-  }
 })();
 </script>
 </body>
