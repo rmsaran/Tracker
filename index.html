@@ -285,7 +285,7 @@ details[open] summary::before{content:"– ";}
       <div class="settings-body">
         <div class="budget-grid">
           <div class="full">
-            <label for="bIncome">Monthly income / salary (₹)</label>
+            <label for="bIncome">Income / salary for <span id="incomeMonthLabel">this month</span> (₹)</label>
             <input type="number" id="bIncome" min="0" step="1">
           </div>
         </div>
@@ -332,6 +332,7 @@ details[open] summary::before{content:"– ";}
       </div>
     </div>
     <div class="section-note" style="margin-top:12px;margin-bottom:0;">Pending amount is income minus everything spent, paid and saved so far. Whatever is left at month end counts as extra savings.</div>
+    <div class="section-note" id="incomeNote" style="margin-top:8px;margin-bottom:0;color:var(--amber);"></div>
     <div class="section-note" id="rolloverNote" style="margin-top:8px;margin-bottom:0;"></div>
     <button class="text-btn no-print" id="printBtn" style="margin-top:14px;">Print monthly summary</button>
   </section>
@@ -446,6 +447,7 @@ details[open] summary::before{content:"– ";}
 
 <script>
 const STORAGE_KEY = 'ledger-data';
+const LEDGER_START = '2026-11';   // the ledger begins in November 2026
 const PALETTE = ['#9C3B34','#33513B','#A8672A','#22314A','#6B7C93','#7A5238','#4F6D5C','#8A4F6B','#5B6478','#B4772A','#3F6C8C','#8C7A3F','#6E3F8C'];
 
 const GROUPS = [
@@ -491,6 +493,7 @@ const DEFAULT_STATE = {
     {name:'Long-term savings',  group:'long',       limit:3000}
   ],
   budgets: { income: 60000, rollover: false },
+  incomeByMonth: {},
   recurringTemplates: [],
   entries: [],
   startMonth: null,
@@ -510,6 +513,27 @@ function monthKey(d){ return d.getFullYear() + '-' + String(d.getMonth()+1).padS
 function todayStr(){
   const d = new Date();
   return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+function defaultDate(){
+  const t = todayStr();
+  return t < LEDGER_START + '-01' ? LEDGER_START + '-01' : t;
+}
+/* Income is set by hand for each month. A month starts at 0 until you enter it. */
+function incomeFor(key){
+  const v = state.incomeByMonth[key];
+  return v === undefined ? 0 : v;
+}
+function syncIncomeField(){
+  document.getElementById('incomeMonthLabel').textContent = monthLabel(currentMonth);
+  const set = state.incomeByMonth[monthKey(currentMonth)];
+  document.getElementById('bIncome').value = set === undefined ? '' : set;
+  updatePlanTotals();
+}
+function clampMonth(){
+  if(monthKey(currentMonth) < state.startMonth){
+    const p = state.startMonth.split('-');
+    currentMonth = new Date(parseInt(p[0],10), parseInt(p[1],10)-1, 1);
+  }
 }
 function fmtMoney(n){ return '₹' + Math.round(n).toLocaleString('en-IN'); }
 function monthLabel(d){ return d.toLocaleDateString('en-IN', {month:'long', year:'numeric'}); }
@@ -622,6 +646,14 @@ function migrate(raw){
   if(!Array.isArray(s.recurringTemplates)) s.recurringTemplates = [];
   s.entries = s.entries.filter(e => e && typeof e.date === 'string' && e.date.length >= 10);
 
+  const ibm = {};
+  if(s.incomeByMonth && typeof s.incomeByMonth === 'object'){
+    Object.keys(s.incomeByMonth).forEach(k => {
+      const v = Number(s.incomeByMonth[k]);
+      if(/^\d{4}-\d{2}$/.test(k) && isFinite(v) && v >= 0) ibm[k] = v;
+    });
+  }
+  s.incomeByMonth = ibm;
   s.subs = cleanSubs(s.subs);
   applySubs(s.subs);
 
@@ -629,10 +661,7 @@ function migrate(raw){
   s.entries.forEach(fixSub);
   s.recurringTemplates.forEach(fixSub);
 
-  if(!s.startMonth){
-    const keys = s.entries.map(e => e.date.slice(0,7)).concat([nowKey]).sort();
-    s.startMonth = keys[0];
-  }
+  s.startMonth = LEDGER_START;
   s.recurringTemplates.forEach(t => {
     if(!Array.isArray(t.skip)) t.skip = [];
     if(!t.startMonth){
@@ -791,7 +820,6 @@ async function downloadBackup(){
 
 /* ---- Budget plan editor ---- */
 function renderPlanEditor(){
-  document.getElementById('bIncome').value = state.budgets.income;
   document.getElementById('bRollover').checked = !!state.budgets.rollover;
   const host = document.getElementById('planEditor');
   host.innerHTML = '';
@@ -804,11 +832,11 @@ function renderPlanEditor(){
     host.appendChild(row);
   });
   host.querySelectorAll('.plan-limit').forEach(inp => inp.addEventListener('input', updatePlanTotals));
-  updatePlanTotals();
+  syncIncomeField();
 }
 
 function commitPlanInputs(){
-  state.budgets.income = parseFloat(document.getElementById('bIncome').value) || 0;
+  state.incomeByMonth[monthKey(currentMonth)] = parseFloat(document.getElementById('bIncome').value) || 0;
   state.budgets.rollover = document.getElementById('bRollover').checked;
   document.querySelectorAll('#planEditor .plan-limit').forEach(inp => {
     const c = state.categories.find(c => c.name === inp.dataset.name);
@@ -833,6 +861,7 @@ function render(){
   document.getElementById('monthLabel').textContent = monthLabel(currentMonth);
   document.getElementById('prevMonth').disabled = monthKey(currentMonth) <= state.startMonth;
 
+  const ik = monthKey(currentMonth);
   const changed = ensureRecurringForMonth(currentMonth);
   if(changed) saveState();
 
@@ -841,7 +870,7 @@ function render(){
   const spent = sumKind('expense');
   const debtPaid = sumKind('debt');
   const saved = sumKind('savings');
-  const income = state.budgets.income || 0;
+  const income = incomeFor(ik);
 
   const perCat = {};     // by sub-category
   const perGroup = {};   // by main category
@@ -868,6 +897,9 @@ function render(){
   pendEl.textContent = fmtMoney(pending);
   pendEl.className = 'value ' + (pending < 0 ? 'neg' : 'pos');
 
+  document.getElementById('incomeNote').textContent = state.incomeByMonth[ik] === undefined
+    ? 'Income for this month is not set yet. Enter it in Budget plan.'
+    : '';
   document.getElementById('rolloverNote').textContent = carryAmount > 0
     ? 'Expense budget includes ' + fmtMoney(carryAmount) + ' rolled over from last month.'
     : '';
@@ -1000,7 +1032,7 @@ function renderGroups(perCat, perGroup){
 
 function exitEditMode(){
   editingId = null;
-  document.getElementById('fDate').value = todayStr();
+  document.getElementById('fDate').value = defaultDate();
   populateCategorySelect();
   document.getElementById('fAmount').value = '';
   document.getElementById('fNote').value = '';
@@ -1158,10 +1190,12 @@ document.getElementById('subManager').addEventListener('click', async (ev)=>{
 document.getElementById('prevMonth').addEventListener('click', ()=>{
   if(monthKey(currentMonth) <= state.startMonth) return;
   currentMonth.setMonth(currentMonth.getMonth()-1);
+  syncIncomeField();
   render();
 });
 document.getElementById('nextMonth').addEventListener('click', ()=>{
   currentMonth.setMonth(currentMonth.getMonth()+1);
+  syncIncomeField();
   render();
 });
 
@@ -1279,6 +1313,7 @@ document.getElementById('restoreBackupInput').addEventListener('change', (e)=>{
       await saveState();
       populateCategorySelect();
       setDateMin();
+      clampMonth();
       renderPlanEditor();
       renderSubManager();
       render();
@@ -1314,6 +1349,7 @@ document.getElementById('addBtn').addEventListener('click', async ()=>{
     if(e){ e.date = date; e.category = category; e.amount = amount; e.note = note; }
     exitEditMode();
     currentMonth = entryMonth;
+    syncIncomeField();
     const ok = await saveState();
     render();
     if(ok) setStatus('');
@@ -1338,6 +1374,7 @@ document.getElementById('addBtn').addEventListener('click', async ()=>{
   document.getElementById('fNote').value = '';
   document.getElementById('fRecurring').checked = false;
   currentMonth = entryMonth;
+    syncIncomeField();
   const ok = await saveState();
   render();
   if(ok) setStatus('');
@@ -1354,7 +1391,7 @@ document.getElementById('savePlanBtn').addEventListener('click', async ()=>{
   populateCategorySelect();
   renderPlanEditor();
   render();
-  setStatus(ok ? 'Plan saved.' : 'Could not save the plan just now — try again.');
+  setStatus(ok ? 'Plan saved. Income set for ' + monthLabel(currentMonth) + '.' : 'Could not save the plan just now — try again.');
 });
 
 (async function init(){
@@ -1362,8 +1399,9 @@ document.getElementById('savePlanBtn').addEventListener('click', async ()=>{
   await loadState();
   const warning = loadProblem ? document.getElementById('statusNote').textContent : '';
   await saveState();
-  document.getElementById('fDate').value = todayStr();
+  document.getElementById('fDate').value = defaultDate();
   setDateMin();
+  clampMonth();
   populateCategorySelect();
   renderPlanEditor();
   renderSubManager();
