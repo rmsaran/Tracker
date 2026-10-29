@@ -34,15 +34,6 @@ body{
   padding:18px 14px 60px;
 }
 
-.app-nav{
-  max-width:640px;margin:0 auto 10px;display:flex;gap:8px;align-items:center;
-  font-size:12px;font-family:'IBM Plex Mono', monospace;color:var(--ink-soft);
-}
-.app-nav a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--rule);}
-.app-nav a:hover{color:var(--rule-red);border-color:var(--rule-red);}
-.app-nav a.current{color:var(--rule-red);border-color:var(--rule-red);}
-.app-nav span{color:var(--rule);}
-
 .ledger{
   max-width:640px;
   margin:0 auto;
@@ -66,68 +57,55 @@ body{
   padding:22px 18px 14px 8px;
   border-bottom:2px solid var(--ink);
 }
-.stamp{
-  font-size:22px;
-  font-weight:700;
-  letter-spacing:0.3px;
-}
-.stamp-sub{
-  font-size:12.5px;
-  color:var(--ink-soft);
-  margin-top:2px;
-}
+.stamp{font-size:22px;font-weight:700;letter-spacing:0.3px;}
+.stamp-sub{font-size:12.5px;color:var(--ink-soft);margin-top:2px;}
 .month-nav{
-  display:flex;
-  align-items:center;
-  gap:14px;
-  margin-top:12px;
-  font-family:'IBM Plex Mono', monospace;
-  font-size:14px;
+  display:flex;align-items:center;gap:14px;margin-top:12px;
+  font-family:'IBM Plex Mono', monospace;font-size:14px;
 }
 .month-nav button{
-  background:none;
-  border:1px solid var(--ink);
-  color:var(--ink);
-  width:26px;
-  height:26px;
-  cursor:pointer;
-  font-size:15px;
-  line-height:1;
+  background:none;border:1px solid var(--ink);color:var(--ink);
+  width:26px;height:26px;cursor:pointer;font-size:15px;line-height:1;
 }
 .month-nav button:hover:not(:disabled){background:var(--ink);color:var(--paper-light);}
 .month-nav button:disabled{opacity:0.3;cursor:not-allowed;}
 .month-nav span{min-width:150px;}
 
-section{
-  padding:16px 18px 16px 8px;
-  border-bottom:1px solid var(--rule);
-}
+section{padding:16px 18px 16px 8px;border-bottom:1px solid var(--rule);}
 
-h2{
-  font-size:13px;
-  font-weight:600;
-  margin:0 0 12px;
-  color:var(--ink-soft);
-}
+h2{font-size:13px;font-weight:600;margin:0 0 12px;color:var(--ink-soft);}
 .section-note{font-size:11.5px;color:var(--ink-soft);margin:-6px 0 12px;}
 
-/* Budgets */
-.budget-grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px 14px;
+/* Backup reminder */
+.backup-banner{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+  margin:0 18px 0 8px;padding:9px 12px;
+  border:1px solid var(--amber);color:var(--amber);font-size:12.5px;background:var(--paper);
 }
-.budget-grid label{display:block;font-size:11px;color:var(--ink-soft);margin-bottom:4px;}
-.budget-grid input{
-  width:100%;font-family:'IBM Plex Mono', monospace;font-size:14px;
-  padding:7px 8px;border:1px solid var(--rule);background:var(--paper-light);color:var(--ink);
+.backup-banner button{
+  background:none;border:1px solid var(--amber);color:var(--amber);cursor:pointer;
+  font-family:'Source Serif 4', serif;font-size:12.5px;padding:5px 10px;
 }
-.budget-grid input:focus{outline:2px solid var(--ink);outline-offset:1px;}
+.backup-banner button:hover{background:var(--amber);color:var(--paper-light);}
+
+/* Budget plan editor */
+.budget-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;}
 .budget-grid .full{grid-column:1/-1;}
+.plan-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.plan-name{flex:1;font-size:13px;}
+.plan-name small{display:block;font-size:11px;color:var(--ink-soft);margin-top:1px;}
+.plan-row input{width:110px;}
+.plan-totals{
+  margin-top:16px;padding:10px 12px;border:1px solid var(--rule);background:var(--paper);
+  font-size:12.5px;display:flex;flex-direction:column;gap:4px;
+}
+.plan-totals .row{display:flex;justify-content:space-between;}
+.plan-totals .row span:last-child{font-family:'IBM Plex Mono', monospace;font-weight:600;}
+.plan-totals .neg{color:var(--rule-red);}
+.plan-totals .pos{color:var(--green);}
 .save-budgets{
-  grid-column:1/-1;
-  background:var(--ink);color:var(--paper-light);border:none;padding:9px;
-  font-family:'Source Serif 4', serif;font-weight:600;font-size:13px;cursor:pointer;margin-top:2px;
+  width:100%;background:var(--ink);color:var(--paper-light);border:none;padding:10px;
+  font-family:'Source Serif 4', serif;font-weight:600;font-size:13px;cursor:pointer;margin-top:16px;
 }
 .save-budgets:hover{background:var(--rule-red);}
 
@@ -145,20 +123,10 @@ h2{
 .health-badge.warn{color:var(--amber);border-color:var(--amber);}
 .health-badge.bad{color:var(--rule-red);border-color:var(--rule-red);}
 
-.summary-grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:14px 20px;
-}
-.summary-cell .label{
-  font-size:11.5px;
-  color:var(--ink-soft);
-}
+.summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px 20px;}
+.summary-cell .label{font-size:11.5px;color:var(--ink-soft);}
 .summary-cell .value{
-  font-family:'IBM Plex Mono', monospace;
-  font-size:19px;
-  font-weight:600;
-  margin-top:2px;
+  font-family:'IBM Plex Mono', monospace;font-size:19px;font-weight:600;margin-top:2px;
 }
 .value.neg{color:var(--rule-red);}
 .value.pos{color:var(--green);}
@@ -169,42 +137,35 @@ h2{
 }
 .text-btn:hover{background:var(--ink);color:var(--paper-light);}
 
-.progress-wrap{margin-top:14px;}
-.progress-wrap:first-child{margin-top:0;}
+/* Progress bars */
 .progress-wrap .label-row{
-  display:flex;
-  justify-content:space-between;
-  font-size:12.5px;
-  color:var(--ink-soft);
-  margin-bottom:6px;
+  display:flex;justify-content:space-between;font-size:12.5px;color:var(--ink-soft);margin-bottom:6px;
 }
 .progress-wrap .label-row span:last-child{font-family:'IBM Plex Mono', monospace;color:var(--ink);}
-.progress-track{
-  height:8px;
-  background:var(--paper);
-  border:1px solid var(--rule);
-}
+.progress-track{height:8px;background:var(--paper);border:1px solid var(--rule);}
 .progress-fill{height:100%;background:var(--green);}
 .progress-fill.warn{background:var(--amber);}
 .progress-fill.over{background:var(--rule-red);}
-.progress-note{font-size:11.5px;color:var(--ink-soft);margin-top:6px;}
+.progress-note{font-size:11.5px;color:var(--ink-soft);margin-top:5px;}
+.sub-line{font-size:11.5px;color:var(--ink-soft);margin-top:6px;line-height:1.5;}
 
-.entry-form{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
+/* Group cards */
+.group-card{margin-bottom:20px;}
+.group-card:last-child{margin-bottom:0;}
+.group-head{
+  display:flex;justify-content:space-between;font-size:13px;font-weight:600;
+  border-bottom:1px solid var(--ink);padding-bottom:5px;margin-bottom:10px;
 }
+.group-head span:last-child{font-family:'IBM Plex Mono', monospace;}
+.group-card.kind-savings .group-head{color:var(--green);border-color:var(--green);}
+
+.entry-form{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 .entry-form .full{grid-column:1/-1;}
-label{
-  display:block;
-  font-size:11px;
-  color:var(--ink-soft);
-  margin-bottom:4px;
-}
+label{display:block;font-size:11px;color:var(--ink-soft);margin-bottom:4px;}
 input, select{
   width:100%;
   font-family:'IBM Plex Mono', monospace;
-  font-size:14px;
+  font-size:16px;
   padding:7px 8px;
   border:1px solid var(--rule);
   background:var(--paper-light);
@@ -212,29 +173,17 @@ input, select{
 }
 input:focus, select:focus{outline:2px solid var(--ink);outline-offset:1px;}
 button.primary{
-  grid-column:1/-1;
-  background:var(--ink);
-  color:var(--paper-light);
-  border:none;
-  padding:10px;
-  font-family:'Source Serif 4', serif;
-  font-size:14px;
-  font-weight:600;
-  cursor:pointer;
-  margin-top:2px;
+  grid-column:1/-1;background:var(--ink);color:var(--paper-light);border:none;padding:10px;
+  font-family:'Source Serif 4', serif;font-size:14px;font-weight:600;cursor:pointer;margin-top:2px;
 }
 button.primary:hover{background:var(--rule-red);}
 button.primary.editing{background:var(--green);}
 .cancel-edit{
-  grid-column:1/-1;
-  background:none;border:none;color:var(--ink-soft);
-  font-family:'Source Serif 4', serif;font-size:12.5px;
-  text-decoration:underline;cursor:pointer;padding:2px 0;
+  grid-column:1/-1;background:none;border:none;color:var(--ink-soft);
+  font-family:'Source Serif 4', serif;font-size:12.5px;text-decoration:underline;cursor:pointer;padding:2px 0;
 }
 
-.check-row{
-  display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-soft);
-}
+.check-row{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-soft);}
 .check-row input{width:auto;}
 
 .toolbar{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;}
@@ -247,35 +196,27 @@ button.primary.editing{background:var(--green);}
 
 table{width:100%;border-collapse:collapse;font-size:13px;}
 th{
-  text-align:left;
-  font-size:11px;
-  color:var(--ink-soft);
-  font-weight:600;
-  padding-bottom:6px;
-  border-bottom:1px solid var(--ink);
+  text-align:left;font-size:11px;color:var(--ink-soft);font-weight:600;
+  padding-bottom:6px;border-bottom:1px solid var(--ink);
 }
-td{
-  padding:7px 4px;
-  border-bottom:1px dashed var(--rule);
-  font-family:'IBM Plex Mono', monospace;
-}
+td{padding:7px 4px;border-bottom:1px dashed var(--rule);font-family:'IBM Plex Mono', monospace;}
 td.amt{text-align:right;}
 td.note-col{font-family:'Source Serif 4', serif;font-size:12.5px;color:var(--ink-soft);}
+.main-tag{font-family:'Source Serif 4', serif;font-size:10.5px;color:var(--ink-soft);margin-top:1px;}
 .auto-tag{font-size:9.5px;color:var(--ink-soft);border:1px solid var(--rule);padding:1px 4px;margin-left:4px;font-family:'IBM Plex Mono', monospace;}
 tr.row-savings td{color:var(--green);background:var(--green-tint);font-weight:600;}
+tr.row-savings .main-tag{color:var(--green);}
 .del-btn, .edit-btn{
   background:none;border:none;cursor:pointer;font-size:14px;
   font-family:'Source Serif 4', serif;padding:0 3px;
 }
 .del-btn{color:var(--rule-red);}
 .edit-btn{color:var(--ink-soft);}
-tr.row-savings .del-btn{color:var(--rule-red);}
 .empty-row td{
-  text-align:center;color:var(--ink-soft);font-family:'Source Serif 4', serif;
-  padding:16px 0;
+  text-align:center;color:var(--ink-soft);font-family:'Source Serif 4', serif;padding:16px 0;
 }
 
-/* Category consolidation table */
+/* Category table */
 .cat-table td, .cat-table th{font-family:'IBM Plex Mono', monospace;}
 .cat-table td.cat-name{font-family:'Source Serif 4', serif;display:flex;align-items:center;gap:7px;}
 .cat-swatch{width:9px;height:9px;flex:none;display:inline-block;}
@@ -288,10 +229,7 @@ tr.row-savings .del-btn{color:var(--rule-red);}
 .legend-item .name{display:flex;align-items:center;gap:6px;}
 .swatch{width:9px;height:9px;flex:none;}
 
-details summary{
-  cursor:pointer;font-size:13px;font-weight:600;color:var(--ink-soft);
-  list-style:none;
-}
+details summary{cursor:pointer;font-size:13px;font-weight:600;color:var(--ink-soft);list-style:none;}
 details summary::-webkit-details-marker{display:none;}
 details summary::before{content:"+ ";}
 details[open] summary::before{content:"– ";}
@@ -301,27 +239,16 @@ details[open] summary::before{content:"– ";}
   border:1px solid var(--rule);padding:4px 8px;font-size:12px;
   font-family:'IBM Plex Mono', monospace;display:flex;align-items:center;gap:6px;
 }
-.cat-chip.is-savings{color:var(--green);border-color:var(--green);}
 .cat-chip button{background:none;border:none;color:var(--rule-red);cursor:pointer;font-size:12px;padding:0;}
-.cat-add{display:flex;flex-direction:column;gap:8px;}
-.cat-add-row{display:flex;gap:8px;}
-.cat-add-row input{flex:1;}
-.cat-add-row button{
-  border:1px solid var(--ink);background:none;color:var(--ink);cursor:pointer;
-  font-family:'Source Serif 4', serif;font-size:13px;padding:0 12px;
-}
 .status-note{font-size:11px;color:var(--ink-soft);margin-top:16px;padding:0 18px 0 8px;}
 
 @media print{
   body{background:#fff;padding:0;}
-  .app-nav{display:none;}
   .ledger{border:none;max-width:100%;padding-left:0;}
   .ledger::before{display:none;}
   .no-print{display:none !important;}
   .month-nav button{display:none;}
   #entriesTable th:last-child, #entriesTable td:last-child{display:none;}
-  details > summary{display:none;}
-  details > .settings-body{display:block !important;}
   section{border-bottom:1px solid #ccc; padding:10px 0;}
 }
 </style>
@@ -331,7 +258,7 @@ details[open] summary::before{content:"– ";}
 <div class="ledger">
   <div class="ledger-head">
     <div class="stamp">Personal Ledger</div>
-    <div class="stamp-sub">Budgets, daily expenses, savings and category totals, kept the ledger way</div>
+    <div class="stamp-sub">Income, limits, expenses and savings goals, kept the ledger way</div>
     <div class="month-nav">
       <button id="prevMonth">‹</button>
       <span id="monthLabel">—</span>
@@ -339,30 +266,31 @@ details[open] summary::before{content:"– ";}
     </div>
   </div>
 
+  <div class="backup-banner no-print" id="backupBanner" style="display:none;margin-top:14px;">
+    <span id="backupBannerText"></span>
+    <button id="bannerBackupBtn">Download backup</button>
+  </div>
+
   <section class="no-print">
     <details>
-      <summary>Budgets</summary>
+      <summary>Budget plan</summary>
       <div class="settings-body">
         <div class="budget-grid">
-          <div>
-            <label for="bMonthly">Monthly budget (₹)</label>
-            <input type="number" id="bMonthly" min="0" step="1">
+          <div class="full">
+            <label for="bIncome">Monthly income / salary (₹)</label>
+            <input type="number" id="bIncome" min="0" step="1">
           </div>
-          <div>
-            <label for="bSavings">Savings budget (₹)</label>
-            <input type="number" id="bSavings" min="0" step="1">
-          </div>
-          <div>
-            <label for="bExpense">Expense budget (₹)</label>
-            <input type="number" id="bExpense" min="0" step="1">
-          </div>
-          <div>
-            <label for="bCreditCard">Credit card budget (₹)</label>
-            <input type="number" id="bCreditCard" min="0" step="1">
-          </div>
-          <label class="check-row full"><input type="checkbox" id="bRollover"> Carry unused expense budget into next month</label>
-          <button class="save-budgets" id="saveBudgetsBtn">Save budgets</button>
         </div>
+        <label style="margin-top:16px;">Monthly limit per category (₹)</label>
+        <div id="planEditor"></div>
+
+        <div class="plan-totals">
+          <div class="row"><span>Total planned</span><span id="planTotal">₹0</span></div>
+          <div class="row"><span id="planRemainderLabel">Unallocated (remainder saved)</span><span id="planRemainder">₹0</span></div>
+        </div>
+
+        <label class="check-row" style="margin-top:16px;"><input type="checkbox" id="bRollover"> Carry unused expense budget into next month</label>
+        <button class="save-budgets" id="savePlanBtn">Save plan</button>
       </div>
     </details>
   </section>
@@ -370,6 +298,10 @@ details[open] summary::before{content:"– ";}
   <section>
     <div class="health-badge" id="healthBadge"><span class="dot"></span><span id="healthText">—</span></div>
     <div class="summary-grid">
+      <div class="summary-cell">
+        <div class="label">Income</div>
+        <div class="value" id="sumIncome">₹0</div>
+      </div>
       <div class="summary-cell">
         <div class="label">Spent this month</div>
         <div class="value" id="sumSpent">₹0</div>
@@ -383,30 +315,35 @@ details[open] summary::before{content:"– ";}
         <div class="value" id="sumSavings">₹0</div>
       </div>
       <div class="summary-cell">
-        <div class="label">Credit card, this month</div>
-        <div class="value" id="sumCC">₹0</div>
+        <div class="label">Debt paid</div>
+        <div class="value" id="sumDebt">₹0</div>
+      </div>
+      <div class="summary-cell">
+        <div class="label">Pending amount</div>
+        <div class="value" id="sumPending">₹0</div>
       </div>
     </div>
-    <div class="section-note" id="rolloverNote" style="margin-top:12px;margin-bottom:0;"></div>
+    <div class="section-note" style="margin-top:12px;margin-bottom:0;">Pending amount is income minus everything spent, paid and saved so far. Whatever is left at month end counts as extra savings.</div>
+    <div class="section-note" id="rolloverNote" style="margin-top:8px;margin-bottom:0;"></div>
     <button class="text-btn no-print" id="printBtn" style="margin-top:14px;">Print monthly summary</button>
   </section>
 
   <section>
     <div class="progress-wrap">
-      <div class="label-row"><span>Savings, toward budget</span><span id="savingsText">₹0 of ₹0</span></div>
+      <div class="label-row"><span>Savings, toward goals</span><span id="savingsText">₹0 of ₹0</span></div>
       <div class="progress-track"><div class="progress-fill" id="savingsFill" style="width:0%"></div></div>
       <div class="progress-note" id="savingsNote"></div>
     </div>
-    <div class="progress-wrap">
-      <div class="label-row"><span>Credit card budget</span><span id="ccText">₹0 of ₹0</span></div>
-      <div class="progress-track"><div class="progress-fill" id="ccFill" style="width:0%"></div></div>
-      <div class="progress-note" id="ccNote"></div>
-    </div>
+  </section>
+
+  <section>
+    <h2>This month by plan</h2>
+    <div id="groupCards"></div>
   </section>
 
   <section class="no-print">
     <h2>Daily expense log</h2>
-    <div class="section-note">Pick the "Savings" category for money set aside — it's tracked separately and highlighted below.</div>
+    <div class="section-note">Pick a sub-category. It counts toward its main category automatically. Use the note for extra detail. Savings and debt payments are logged here too.</div>
     <div class="entry-form">
       <div>
         <label for="fDate">Date</label>
@@ -422,7 +359,7 @@ details[open] summary::before{content:"– ";}
       </div>
       <div>
         <label for="fNote">Note</label>
-        <input type="text" id="fNote" placeholder="optional">
+        <input type="text" id="fNote" placeholder="e.g. Zomato, October bill">
       </div>
       <label class="check-row full" id="recurRow"><input type="checkbox" id="fRecurring"> Repeat this every month</label>
       <button class="primary full" id="addBtn">Add entry</button>
@@ -448,7 +385,7 @@ details[open] summary::before{content:"– ";}
 
   <section>
     <h2>Expense categories</h2>
-    <div class="section-note">Consolidated against this month's expense budget — savings entries are tracked separately above, not counted here.</div>
+    <div class="section-note">Spending only (Essentials and Guilt-free), by sub-category. Debt payments and savings are tracked above.</div>
     <table class="cat-table">
       <thead>
         <tr><th>Category</th><th style="text-align:right">Amount</th><th style="text-align:right">% of spend</th></tr>
@@ -465,24 +402,8 @@ details[open] summary::before{content:"– ";}
     <details>
       <summary>Recurring entries</summary>
       <div class="settings-body">
-        <div class="section-note">These repeat automatically each month until removed here — removing one only stops future months, past entries stay.</div>
+        <div class="section-note">These repeat automatically each month until removed here. Removing one only stops future months, past entries stay. Deleting a single auto entry skips just that month.</div>
         <div class="cat-list" id="recurList"></div>
-      </div>
-    </details>
-  </section>
-
-  <section class="no-print">
-    <details>
-      <summary>Manage categories</summary>
-      <div class="settings-body">
-        <div class="cat-list" id="catList"></div>
-        <div class="cat-add">
-          <div class="cat-add-row">
-            <input type="text" id="newCat" placeholder="New category name">
-            <button id="addCatBtn">Add</button>
-          </div>
-          <label class="check-row"><input type="checkbox" id="newCatSavings"> This is a savings category</label>
-        </div>
       </div>
     </details>
   </section>
@@ -492,6 +413,7 @@ details[open] summary::before{content:"– ";}
       <summary>Backup &amp; restore</summary>
       <div class="settings-body">
         <div class="section-note">Your data lives in this browser only. Download a backup now and then to keep a copy, or move it to another device.</div>
+        <div class="section-note" id="backupInfo" style="margin-top:-4px;"></div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
           <button class="text-btn" id="downloadBackupBtn">Download backup</button>
           <button class="text-btn" id="restoreBackupBtn">Restore from backup</button>
@@ -506,101 +428,209 @@ details[open] summary::before{content:"– ";}
 
 <script>
 const STORAGE_KEY = 'ledger-data';
-const PALETTE = ['#9C3B34','#33513B','#A8672A','#22314A','#6B7C93','#7A5238','#4F6D5C','#8A4F6B','#5B6478','#B4772A'];
+const PALETTE = ['#9C3B34','#33513B','#A8672A','#22314A','#6B7C93','#7A5238','#4F6D5C','#8A4F6B','#5B6478','#B4772A','#3F6C8C','#8C7A3F','#6E3F8C'];
+
+const GROUPS = [
+  {key:'essentials', name:'Essentials',         kind:'expense', subs:['Home','Rent','Food','Grocery','Snack']},
+  {key:'guilt',      name:'Guilt-free spend',   kind:'expense', subs:['Entertainment','Spends for my wants']},
+  {key:'debt',       name:'Debt',               kind:'debt',    subs:['Credit Card Bill']},
+  {key:'short',      name:'Short-term savings', kind:'savings', subs:['RD','Gold','Chit']},
+  {key:'long',       name:'Long-term savings',  kind:'savings', subs:['SIP','Emergency fund']}
+];
+const ALL_SUBS = [];
+GROUPS.forEach(g => g.subs.forEach(s => ALL_SUBS.push({name:s, group:g.key})));
 
 const DEFAULT_STATE = {
+  planVersion: 4,
   categories: [
-    {name:'Food', cc:false, savings:false},
-    {name:'Rent', cc:false, savings:false},
-    {name:'Transport', cc:false, savings:false},
-    {name:'Utilities', cc:false, savings:false},
-    {name:'Shopping', cc:false, savings:false},
-    {name:'Entertainment', cc:false, savings:false},
-    {name:'Health', cc:false, savings:false},
-    {name:'Credit Card', cc:true, savings:false},
-    {name:'Savings', cc:false, savings:true},
-    {name:'Other', cc:false, savings:false}
+    {name:'Essentials',         group:'essentials', limit:41000},
+    {name:'Guilt-free spend',   group:'guilt',      limit:1000},
+    {name:'Debt',               group:'debt',       limit:1000},
+    {name:'Short-term savings', group:'short',      limit:12000},
+    {name:'Long-term savings',  group:'long',       limit:3000}
   ],
-  budgets: {
-    monthly: 30000,
-    savings: 5000,
-    expense: 20000,
-    creditCard: 10000,
-    rollover: false
-  },
+  budgets: { income: 60000, rollover: false },
   recurringTemplates: [],
-  entries: []
+  entries: [],
+  startMonth: null,
+  lastBackup: null
 };
 
 let state = null;
 let currentMonth = new Date();
 currentMonth.setDate(1);
-const MIN_MONTH = new Date(currentMonth);
 let editingId = null;
 let searchText = '';
+let loadProblem = false;
 
+function clone(o){ return JSON.parse(JSON.stringify(o)); }
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function monthKey(d){ return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0'); }
+function todayStr(){
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
 function fmtMoney(n){ return '₹' + Math.round(n).toLocaleString('en-IN'); }
 function monthLabel(d){ return d.toLocaleDateString('en-IN', {month:'long', year:'numeric'}); }
+
+function groupByKey(key){ return GROUPS.find(g => g.key === key) || null; }
+function groupOfSub(name){
+  const low = String(name).toLowerCase();
+  const f = ALL_SUBS.find(s => s.name.toLowerCase() === low);
+  return f ? f.group : null;
+}
+function mainNameOfSub(name){
+  const g = groupByKey(groupOfSub(name));
+  return g ? g.name : '';
+}
+function kindOf(name){
+  const g = groupByKey(groupOfSub(name));
+  return g ? g.kind : 'expense';
+}
+function sumLimits(kind){
+  return state.categories
+    .filter(c => (groupByKey(c.group) || {}).kind === kind)
+    .reduce((s,c) => s + (c.limit || 0), 0);
+}
 function catColor(name){
-  const idx = state.categories.findIndex(c => c.name === name);
+  const low = String(name).toLowerCase();
+  const idx = ALL_SUBS.findIndex(s => s.name.toLowerCase() === low);
   return PALETTE[(idx < 0 ? 0 : idx) % PALETTE.length];
 }
-function isSavingsCat(name){
-  const c = state.categories.find(c => c.name === name);
-  return !!(c && c.savings);
+
+/* Turn a typed name (a sub-category or a main category) into a sub-category.
+   A main category name picks the sub-category named in the note, else its first one. */
+function resolveSub(raw, note){
+  const low = String(raw || '').trim().toLowerCase();
+  if(!low) return null;
+  const sub = ALL_SUBS.find(s => s.name.toLowerCase() === low);
+  if(sub) return sub.name;
+  const g = GROUPS.find(g => g.name.toLowerCase() === low);
+  if(g){
+    const n = String(note || '').toLowerCase();
+    const m = g.subs.find(s => n.includes(s.toLowerCase()));
+    return m || g.subs[0];
+  }
+  return null;
+}
+function fixSub(item){
+  const sub = resolveSub(item.category, item.note) || resolveSub('Essentials', item.note);
+  item.category = sub;
+  return item;
 }
 
+/* ---- Bring any saved data (any older shape) up to the current shape ---- */
 function migrate(raw){
-  if(!raw.budgets){
-    raw.budgets = {
-      monthly: raw.monthlyBudget || DEFAULT_STATE.budgets.monthly,
-      savings: raw.savingsTarget || DEFAULT_STATE.budgets.savings,
-      expense: raw.expenseBudget || DEFAULT_STATE.budgets.expense,
-      creditCard: raw.creditCardCap || DEFAULT_STATE.budgets.creditCard
+  raw = raw || {};
+  const nowKey = monthKey(new Date());
+  let s;
+
+  if(raw.planVersion === 3 || raw.planVersion === 4){
+    s = raw;
+    if(!s.budgets) s.budgets = {};
+    if(typeof s.budgets.income !== 'number') s.budgets.income = DEFAULT_STATE.budgets.income;
+    s.budgets.rollover = !!s.budgets.rollover;
+    const old = Array.isArray(s.categories) ? s.categories : [];
+    s.categories = DEFAULT_STATE.categories.map(d => {
+      const f = old.find(c => c.group === d.group);
+      return {name:d.name, group:d.group, limit: f ? (Number(f.limit) || 0) : d.limit};
+    });
+  } else {
+    const oldCats = Array.isArray(raw.categories) ? raw.categories : [];
+    const legacyGuilt = ['entertainment','shopping','wants'];
+    const mainFor = name => {
+      const c = oldCats.find(x => x.name === name);
+      if(c){
+        if(groupByKey(c.group)) return groupByKey(c.group).name;
+        if(c.savings) return 'Short-term savings';
+        if(c.cc) return 'Debt';
+      }
+      const low = String(name).toLowerCase();
+      const g = GROUPS.find(g => g.name.toLowerCase() === low);
+      if(g) return g.name;
+      if(legacyGuilt.includes(low)) return 'Guilt-free spend';
+      return 'Essentials';
+    };
+    const convert = e => {
+      const main = mainFor(e.category);
+      if(main === e.category) return e;
+      return Object.assign({}, e, {category: main, note: e.note ? e.category + ' – ' + e.note : e.category});
+    };
+    const limits = {};
+    if(raw.planVersion === 2){
+      oldCats.forEach(c => { if(groupByKey(c.group)) limits[c.group] = (limits[c.group] || 0) + (Number(c.limit) || 0); });
+    }
+    s = {
+      planVersion: 3,
+      categories: DEFAULT_STATE.categories.map(d => ({
+        name:d.name, group:d.group,
+        limit: raw.planVersion === 2 ? (limits[d.group] || 0) : d.limit
+      })),
+      budgets: {
+        income: (raw.planVersion === 2 && raw.budgets && typeof raw.budgets.income === 'number') ? raw.budgets.income : DEFAULT_STATE.budgets.income,
+        rollover: !!(raw.budgets && raw.budgets.rollover)
+      },
+      recurringTemplates: (raw.recurringTemplates || []).map(convert),
+      entries: (raw.entries || []).map(convert),
+      startMonth: raw.startMonth || null,
+      lastBackup: raw.lastBackup || null
     };
   }
-  if(typeof raw.budgets.rollover === 'undefined') raw.budgets.rollover = false;
-  if(!raw.categories) raw.categories = DEFAULT_STATE.categories;
-  raw.categories.forEach(c => { if(typeof c.savings === 'undefined') c.savings = false; });
-  if(!raw.categories.some(c => c.savings)){
-    raw.categories.push({name:'Savings', cc:false, savings:true});
+
+  if(!Array.isArray(s.entries)) s.entries = [];
+  if(!Array.isArray(s.recurringTemplates)) s.recurringTemplates = [];
+  s.entries = s.entries.filter(e => e && typeof e.date === 'string' && e.date.length >= 10);
+
+  // Every entry and recurring item ends up on a sub-category (safe to run again)
+  s.entries.forEach(fixSub);
+  s.recurringTemplates.forEach(fixSub);
+
+  if(!s.startMonth){
+    const keys = s.entries.map(e => e.date.slice(0,7)).concat([nowKey]).sort();
+    s.startMonth = keys[0];
   }
-  if(!raw.entries) raw.entries = [];
-  if(!raw.recurringTemplates) raw.recurringTemplates = [];
-  return raw;
+  s.recurringTemplates.forEach(t => {
+    if(!Array.isArray(t.skip)) t.skip = [];
+    if(!t.startMonth){
+      const months = s.entries.filter(e => e.recurringId === t.id).map(e => e.date.slice(0,7)).sort();
+      t.startMonth = months.length ? months[0] : s.startMonth;
+    }
+  });
+  if(typeof s.lastBackup !== 'string') s.lastBackup = null;
+  s.planVersion = 4;
+  return s;
 }
 
-/* ---- One-time migration: pull in data saved under the old per-profile scheme, if any ---- */
+/* ---- Storage: plain browser localStorage ---- */
 function migrateProfileDataIfNeeded(){
   try{
-    if(localStorage.getItem(STORAGE_KEY)) return; // already have plain data, nothing to do
+    if(localStorage.getItem(STORAGE_KEY)) return;
     const activeProfile = localStorage.getItem('ledger-active-profile');
     if(activeProfile){
       const scoped = localStorage.getItem('ledger-data::' + activeProfile);
-      if(scoped){
-        localStorage.setItem(STORAGE_KEY, scoped);
-      }
+      if(scoped) localStorage.setItem(STORAGE_KEY, scoped);
     }
-  }catch(e){
-    // localStorage unavailable - nothing to migrate
-  }
+  }catch(e){}
 }
 
-/* ---- Storage: plain browser localStorage, works on GitHub Pages or anywhere else ---- */
 async function loadState(){
-  try{
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if(raw){
+  let raw = null;
+  try{ raw = localStorage.getItem(STORAGE_KEY); }catch(e){}
+  if(raw){
+    try{
       state = migrate(JSON.parse(raw));
       setStatus('');
       return;
+    }catch(e){
+      // Keep a copy of what could not be read before starting fresh
+      try{ localStorage.setItem('ledger-data-unreadable-copy', raw); }catch(_){}
+      loadProblem = true;
     }
-  }catch(e){
-    // localStorage unavailable (e.g. private browsing) - fall through to defaults
   }
-  state = JSON.parse(JSON.stringify(DEFAULT_STATE));
-  setStatus('Starting a fresh ledger.');
+  state = migrate({});
+  setStatus(loadProblem
+    ? 'Your saved data could not be read, so a fresh ledger was started. A copy of the old data was kept in this browser. Restore from a backup if you have one.'
+    : 'Starting a fresh ledger.');
 }
 
 async function saveState(){
@@ -623,22 +653,27 @@ function entriesForMonth(monthDate){
 }
 
 function getExpenseSpentForMonth(monthDate){
-  return entriesForMonth(monthDate).filter(e => !isSavingsCat(e.category)).reduce((s,e)=>s+e.amount,0);
+  return entriesForMonth(monthDate).filter(e => kindOf(e.category) === 'expense').reduce((s,e)=>s+e.amount,0);
 }
 
 function effectiveExpenseBudget(monthDate){
-  const base = state.budgets.expense || 0;
-  if(!state.budgets.rollover) return base;
+  const base = sumLimits('expense');
+  if(!state.budgets.rollover || base <= 0) return base;
   const prev = new Date(monthDate.getFullYear(), monthDate.getMonth()-1, 1);
-  const prevSpent = getExpenseSpentForMonth(prev);
-  const carry = Math.max(base - prevSpent, 0);
+  if(monthKey(prev) < state.startMonth) return base;
+  const carry = Math.max(base - getExpenseSpentForMonth(prev), 0);
   return base + carry;
 }
 
+/* Recurring entries are created only from the month they were set up,
+   up to the real current month, and never for a month the user skipped. */
 function ensureRecurringForMonth(monthDate){
   const key = monthKey(monthDate);
+  if(key > monthKey(new Date())) return false;
   let changed = false;
   state.recurringTemplates.forEach(t=>{
+    if(key < t.startMonth) return;
+    if((t.skip || []).includes(key)) return;
     const exists = state.entries.some(e => e.recurringId === t.id && e.date.slice(0,7) === key);
     if(!exists){
       const daysInMonth = new Date(monthDate.getFullYear(), monthDate.getMonth()+1, 0).getDate();
@@ -659,85 +694,171 @@ function populateCategorySelect(){
   const sel = document.getElementById('fCategory');
   const prev = sel.value;
   sel.innerHTML = '';
-  state.categories.forEach(c => {
-    const opt = document.createElement('option');
-    opt.value = c.name; opt.textContent = c.name;
-    sel.appendChild(opt);
+  GROUPS.forEach(g => {
+    const main = state.categories.find(c => c.group === g.key);
+    const og = document.createElement('optgroup');
+    og.label = main ? main.name : g.name;
+    g.subs.forEach(sub => {
+      const opt = document.createElement('option');
+      opt.value = sub; opt.textContent = sub;
+      og.appendChild(opt);
+    });
+    sel.appendChild(og);
   });
-  if(prev) sel.value = prev;
+  if(prev && groupOfSub(prev)) sel.value = prev;
 }
 
-function fillBudgetInputs(){
-  document.getElementById('bMonthly').value = state.budgets.monthly;
-  document.getElementById('bSavings').value = state.budgets.savings;
-  document.getElementById('bExpense').value = state.budgets.expense;
-  document.getElementById('bCreditCard').value = state.budgets.creditCard;
+function setDateMin(){
+  document.getElementById('fDate').min = state.startMonth + '-01';
+}
+
+/* ---- Backup reminder ---- */
+function renderBackupInfo(){
+  const lb = state.lastBackup;
+  const days = lb ? Math.floor((Date.now() - new Date(lb).getTime()) / 86400000) : null;
+  const info = document.getElementById('backupInfo');
+  if(days === null) info.textContent = 'No backup downloaded yet.';
+  else if(days <= 0) info.textContent = 'Last backup: today.';
+  else info.textContent = 'Last backup: ' + days + ' day' + (days === 1 ? '' : 's') + ' ago.';
+
+  const banner = document.getElementById('backupBanner');
+  const due = state.entries.length > 0 && (days === null || days >= 7);
+  banner.style.display = due ? '' : 'none';
+  document.getElementById('backupBannerText').textContent = days === null
+    ? 'You have not taken a backup yet.'
+    : 'Last backup was ' + days + ' days ago.';
+}
+
+async function downloadBackup(){
+  state.lastBackup = new Date().toISOString();
+  await saveState();
+  const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'ledger-backup-' + todayStr() + '.json';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  renderBackupInfo();
+  setStatus('Backup downloaded.');
+}
+
+/* ---- Budget plan editor ---- */
+function renderPlanEditor(){
+  document.getElementById('bIncome').value = state.budgets.income;
   document.getElementById('bRollover').checked = !!state.budgets.rollover;
+  const host = document.getElementById('planEditor');
+  host.innerHTML = '';
+  state.categories.forEach(c => {
+    const g = groupByKey(c.group);
+    const row = document.createElement('div');
+    row.className = 'plan-row';
+    row.innerHTML = '<span class="plan-name">' + esc(c.name) + '<small>' + esc(g ? g.subs.join(', ') : '') + '</small></span>' +
+      '<input type="number" class="plan-limit" min="0" step="1" data-name="' + esc(c.name) + '" value="' + c.limit + '">';
+    host.appendChild(row);
+  });
+  host.querySelectorAll('.plan-limit').forEach(inp => inp.addEventListener('input', updatePlanTotals));
+  updatePlanTotals();
 }
 
+function commitPlanInputs(){
+  state.budgets.income = parseFloat(document.getElementById('bIncome').value) || 0;
+  state.budgets.rollover = document.getElementById('bRollover').checked;
+  document.querySelectorAll('#planEditor .plan-limit').forEach(inp => {
+    const c = state.categories.find(c => c.name === inp.dataset.name);
+    if(c) c.limit = parseFloat(inp.value) || 0;
+  });
+}
+
+function updatePlanTotals(){
+  let planned = 0;
+  document.querySelectorAll('#planEditor .plan-limit').forEach(inp => { planned += parseFloat(inp.value) || 0; });
+  const income = parseFloat(document.getElementById('bIncome').value) || 0;
+  const rem = income - planned;
+  document.getElementById('planTotal').textContent = fmtMoney(planned);
+  const remEl = document.getElementById('planRemainder');
+  remEl.textContent = fmtMoney(Math.abs(rem));
+  remEl.className = rem < 0 ? 'neg' : 'pos';
+  document.getElementById('planRemainderLabel').textContent = rem < 0 ? 'Over-planned by' : 'Unallocated (remainder saved)';
+}
+
+/* ---- Main render ---- */
 function render(){
   document.getElementById('monthLabel').textContent = monthLabel(currentMonth);
-  document.getElementById('prevMonth').disabled = monthKey(currentMonth) <= monthKey(MIN_MONTH);
+  document.getElementById('prevMonth').disabled = monthKey(currentMonth) <= state.startMonth;
 
   const changed = ensureRecurringForMonth(currentMonth);
   if(changed) saveState();
 
   const monthEntries = entriesForMonth();
-  const savingsEntries = monthEntries.filter(e => isSavingsCat(e.category));
-  const expenseEntries = monthEntries.filter(e => !isSavingsCat(e.category));
+  const sumKind = k => monthEntries.filter(e => kindOf(e.category) === k).reduce((s,e)=>s+e.amount,0);
+  const spent = sumKind('expense');
+  const debtPaid = sumKind('debt');
+  const saved = sumKind('savings');
+  const income = state.budgets.income || 0;
 
-  const totalSpent = expenseEntries.reduce((s,e)=>s+e.amount,0);
-  const savingsSaved = savingsEntries.reduce((s,e)=>s+e.amount,0);
-  const ccCategories = new Set(state.categories.filter(c=>c.cc).map(c=>c.name));
-  const ccSpent = expenseEntries.filter(e=>ccCategories.has(e.category)).reduce((s,e)=>s+e.amount,0);
+  const perCat = {};     // by sub-category
+  const perGroup = {};   // by main category
+  monthEntries.forEach(e => {
+    perCat[e.category] = (perCat[e.category]||0) + e.amount;
+    const gk = groupOfSub(e.category);
+    perGroup[gk] = (perGroup[gk]||0) + e.amount;
+  });
 
+  const expBudgetBase = sumLimits('expense');
   const expBudget = effectiveExpenseBudget(currentMonth);
-  const expenseLeft = expBudget - totalSpent;
-  const carryAmount = expBudget - (state.budgets.expense || 0);
+  const expenseLeft = expBudget - spent;
+  const carryAmount = expBudget - expBudgetBase;
+  const pending = income - spent - debtPaid - saved;
 
-  document.getElementById('sumSpent').textContent = fmtMoney(totalSpent);
+  document.getElementById('sumIncome').textContent = fmtMoney(income);
+  document.getElementById('sumSpent').textContent = fmtMoney(spent);
   const remEl = document.getElementById('sumRemaining');
   remEl.textContent = fmtMoney(expenseLeft);
   remEl.className = 'value ' + (expenseLeft < 0 ? 'neg' : 'pos');
-  document.getElementById('sumSavings').textContent = fmtMoney(savingsSaved);
-  document.getElementById('sumCC').textContent = fmtMoney(ccSpent);
+  document.getElementById('sumSavings').textContent = fmtMoney(saved);
+  document.getElementById('sumDebt').textContent = fmtMoney(debtPaid);
+  const pendEl = document.getElementById('sumPending');
+  pendEl.textContent = fmtMoney(pending);
+  pendEl.className = 'value ' + (pending < 0 ? 'neg' : 'pos');
 
   document.getElementById('rolloverNote').textContent = carryAmount > 0
-    ? 'Includes ' + fmtMoney(carryAmount) + ' rolled over from last month\'s unused expense budget.'
+    ? 'Expense budget includes ' + fmtMoney(carryAmount) + ' rolled over from last month.'
     : '';
 
-  const sTarget = state.budgets.savings || 0;
-  const sPct = sTarget > 0 ? Math.min(savingsSaved/sTarget,1)*100 : 0;
+  // Overall savings progress
+  const sTarget = sumLimits('savings');
+  const sPct = sTarget > 0 ? Math.min(saved/sTarget,1)*100 : 0;
   document.getElementById('savingsFill').style.width = sPct + '%';
-  document.getElementById('savingsFill').className = 'progress-fill';
-  document.getElementById('savingsText').textContent = fmtMoney(savingsSaved) + ' of ' + fmtMoney(sTarget);
-  document.getElementById('savingsNote').textContent = sTarget > 0 && savingsSaved >= sTarget
-    ? 'Savings budget reached for this month.'
-    : (sTarget > 0 ? fmtMoney(Math.max(sTarget-savingsSaved,0)) + ' left to reach it.' : '');
+  document.getElementById('savingsText').textContent = fmtMoney(saved) + ' of ' + fmtMoney(sTarget);
+  document.getElementById('savingsNote').textContent = sTarget > 0 && saved >= sTarget
+    ? 'All savings goals reached for this month.'
+    : (sTarget > 0 ? fmtMoney(Math.max(sTarget-saved,0)) + ' left to reach your goals.' : '');
 
-  const cap = state.budgets.creditCard || 0;
-  const ccPct = cap > 0 ? Math.min(ccSpent/cap,1)*100 : 0;
-  const ccFill = document.getElementById('ccFill');
-  ccFill.style.width = ccPct + '%';
-  ccFill.className = 'progress-fill' + (ccSpent > cap ? ' over' : (ccPct > 80 ? ' warn' : ''));
-  document.getElementById('ccText').textContent = fmtMoney(ccSpent) + ' of ' + fmtMoney(cap);
-  document.getElementById('ccNote').textContent = ccSpent > cap
-    ? 'Over the credit card budget by ' + fmtMoney(ccSpent-cap) + '.'
-    : (ccPct > 80 ? 'Getting close to the credit card budget.' : '');
-
-  const expensePct = expBudget > 0 ? totalSpent/expBudget : 0;
-  const ccRatio = cap > 0 ? ccSpent/cap : 0;
-  const savingsRatio = sTarget > 0 ? savingsSaved/sTarget : 1;
+  // Health badge: red if total expense budget is exceeded, amber if any category is over its limit
+  const overList = state.categories
+    .filter(c => c.limit > 0 && (groupByKey(c.group)||{}).kind !== 'savings' && (perGroup[c.group]||0) > c.limit)
+    .map(c => c.name);
   let level = 'good', text = 'On track';
-  if(expensePct > 1 || ccRatio > 1){ level='bad'; text='Over budget'; }
-  else if(expensePct >= 0.8 || ccRatio >= 0.8 || (sTarget > 0 && savingsRatio < 0.5)){ level='warn'; text='Watch your spending'; }
-  const badge = document.getElementById('healthBadge');
-  badge.className = 'health-badge ' + level;
+  if(expBudget > 0 && spent > expBudget){ level = 'bad'; text = 'Over budget'; }
+  else if(overList.length){
+    level = 'warn';
+    text = 'Over limit: ' + overList.slice(0,2).join(', ') + (overList.length > 2 ? ' +' + (overList.length-2) + ' more' : '');
+  }
+  document.getElementById('healthBadge').className = 'health-badge ' + level;
   document.getElementById('healthText').textContent = text;
 
+  renderGroups(perCat, perGroup);
+
+  // Entries table (search filters the display only)
   const q = searchText.trim().toLowerCase();
   const displayEntries = q
-    ? monthEntries.filter(e => e.category.toLowerCase().includes(q) || (e.note||'').toLowerCase().includes(q))
+    ? monthEntries.filter(e =>
+        e.category.toLowerCase().includes(q) ||
+        mainNameOfSub(e.category).toLowerCase().includes(q) ||
+        (e.note||'').toLowerCase().includes(q))
     : monthEntries;
 
   const rows = document.getElementById('entryRows');
@@ -745,22 +866,33 @@ function render(){
   if(displayEntries.length === 0){
     rows.innerHTML = '<tr class="empty-row"><td colspan="5">' + (monthEntries.length === 0 ? 'No entries yet this month.' : 'No entries match your search.') + '</td></tr>';
   }else{
-    displayEntries.slice().sort((a,b)=>b.date.localeCompare(a.date)).forEach(e=>{
+    displayEntries.slice().reverse().forEach(e=>{ /* newest added first */
       const tr = document.createElement('tr');
-      if(isSavingsCat(e.category)) tr.className = 'row-savings';
-      tr.innerHTML = `
-        <td>${e.date.slice(8,10)}/${e.date.slice(5,7)}</td>
-        <td>${e.category}</td>
-        <td class="note-col">${e.note ? e.note : ''}${e.autoGenerated ? ' <span class="auto-tag">auto</span>' : ''}</td>
-        <td class="amt">${fmtMoney(e.amount)}</td>
-        <td><button class="edit-btn" data-id="${e.id}" title="Edit">✎</button><button class="del-btn" data-id="${e.id}" title="Delete">✕</button></td>`;
+      if(kindOf(e.category) === 'savings') tr.className = 'row-savings';
+      tr.innerHTML =
+        '<td>' + e.date.slice(8,10) + '/' + e.date.slice(5,7) + '</td>' +
+        '<td>' + esc(e.category) + '<div class="main-tag">' + esc(mainNameOfSub(e.category)) + '</div></td>' +
+        '<td class="note-col">' + esc(e.note || '') + (e.autoGenerated ? ' <span class="auto-tag">auto</span>' : '') + '</td>' +
+        '<td class="amt">' + fmtMoney(e.amount) + '</td>' +
+        '<td><button class="edit-btn" data-id="' + e.id + '" title="Edit">✎</button><button class="del-btn" data-id="' + e.id + '" title="Delete">✕</button></td>';
       rows.appendChild(tr);
     });
   }
   rows.querySelectorAll('.del-btn').forEach(btn=>{
     btn.addEventListener('click', async ()=>{
-      state.entries = state.entries.filter(e => e.id !== btn.dataset.id);
-      if(editingId === btn.dataset.id) exitEditMode();
+      const e = state.entries.find(e => e.id === btn.dataset.id);
+      if(!e) return;
+      if(!confirm('Delete ' + e.category + ' ' + fmtMoney(e.amount) + ' on ' + e.date.slice(8,10) + '/' + e.date.slice(5,7) + '?')) return;
+      if(e.recurringId){
+        const t = state.recurringTemplates.find(t => t.id === e.recurringId);
+        if(t){
+          if(!Array.isArray(t.skip)) t.skip = [];
+          const mk = e.date.slice(0,7);
+          if(!t.skip.includes(mk)) t.skip.push(mk);
+        }
+      }
+      state.entries = state.entries.filter(x => x.id !== e.id);
+      if(editingId === e.id) exitEditMode();
       await saveState();
       render();
     });
@@ -779,19 +911,53 @@ function render(){
       addBtn.textContent = 'Update entry';
       addBtn.classList.add('editing');
       document.getElementById('cancelEditBtn').style.display = '';
+      document.getElementById('fAmount').scrollIntoView({behavior:'smooth', block:'center'});
     });
   });
 
-  renderCategories(expenseEntries, totalSpent);
-  renderSettingsPanel();
+  renderCategories(monthEntries.filter(e => kindOf(e.category) === 'expense'), spent);
   renderRecurringPanel();
+  renderBackupInfo();
+}
+
+function renderGroups(perCat, perGroup){
+  const host = document.getElementById('groupCards');
+  host.innerHTML = '';
+  state.categories.forEach(c => {
+    const g = groupByKey(c.group) || {key:'', kind:'expense', subs:[]};
+    const amt = perGroup[c.group] || 0;
+    let html = '<div class="group-head"><span>' + esc(c.name) + '</span><span>' +
+      fmtMoney(amt) + (c.limit > 0 ? ' of ' + fmtMoney(c.limit) : '') + '</span></div>';
+    if(c.limit > 0){
+      const ratio = amt / c.limit;
+      let cls = 'progress-fill', note = '';
+      if(g.kind === 'savings'){
+        note = amt >= c.limit ? 'Goal reached.' : fmtMoney(c.limit - amt) + ' to go.';
+      }else if(amt > c.limit){
+        cls += ' over'; note = 'Over by ' + fmtMoney(amt - c.limit) + '.';
+      }else if(g.kind === 'debt'){
+        note = amt >= c.limit ? 'Paid.' : fmtMoney(c.limit - amt) + ' left to pay.';
+      }else{
+        if(g.key === 'guilt' && ratio >= 0.85) cls += ' warn';
+        note = fmtMoney(c.limit - amt) + ' left.';
+      }
+      html += '<div class="progress-wrap"><div class="progress-track"><div class="' + cls +
+        '" style="width:' + (Math.min(ratio,1)*100).toFixed(1) + '%"></div></div>' +
+        '<div class="progress-note">' + note + '</div></div>';
+    }
+    const parts = g.subs.filter(s => perCat[s]).map(s => esc(s) + ' ' + fmtMoney(perCat[s]));
+    html += '<div class="sub-line">' + (parts.length ? parts.join(' · ') : 'Nothing logged yet.') + '</div>';
+    const card = document.createElement('div');
+    card.className = 'group-card kind-' + g.kind;
+    card.innerHTML = html;
+    host.appendChild(card);
+  });
 }
 
 function exitEditMode(){
   editingId = null;
-  document.getElementById('fDate').value = new Date().toISOString().slice(0,10);
+  document.getElementById('fDate').value = todayStr();
   populateCategorySelect();
-  document.getElementById('fCategory').selectedIndex = 0;
   document.getElementById('fAmount').value = '';
   document.getElementById('fNote').value = '';
   document.getElementById('fRecurring').checked = false;
@@ -815,10 +981,10 @@ function renderCategories(expenseEntries, totalSpent){
     sorted.forEach(([name, amt])=>{
       const pct = totalSpent > 0 ? (amt/totalSpent*100).toFixed(1) : '0.0';
       const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td class="cat-name"><span class="cat-swatch" style="background:${catColor(name)}"></span>${name}</td>
-        <td class="amt">${fmtMoney(amt)}</td>
-        <td class="pct">${pct}%</td>`;
+      tr.innerHTML =
+        '<td class="cat-name"><span class="cat-swatch" style="background:' + catColor(name) + '"></span>' + esc(name) + '</td>' +
+        '<td class="amt">' + fmtMoney(amt) + '</td>' +
+        '<td class="pct">' + pct + '%</td>';
       catRows.appendChild(tr);
     });
   }
@@ -834,35 +1000,17 @@ function renderCategories(expenseEntries, totalSpent){
       const start = acc/totalSpent*360;
       acc += amt;
       const end = acc/totalSpent*360;
-      return `${catColor(name)} ${start}deg ${end}deg`;
+      return catColor(name) + ' ' + start + 'deg ' + end + 'deg';
     });
-    pieEl.style.background = `conic-gradient(${stops.join(',')})`;
+    pieEl.style.background = 'conic-gradient(' + stops.join(',') + ')';
     sorted.forEach(([name, amt])=>{
       const pct = (amt/totalSpent*100).toFixed(0);
       const li = document.createElement('div');
       li.className = 'legend-item';
-      li.innerHTML = `<span class="name"><span class="swatch" style="background:${catColor(name)}"></span>${name}</span><span>${pct}%</span>`;
+      li.innerHTML = '<span class="name"><span class="swatch" style="background:' + catColor(name) + '"></span>' + esc(name) + '</span><span>' + pct + '%</span>';
       legendEl.appendChild(li);
     });
   }
-}
-
-function renderSettingsPanel(){
-  const catList = document.getElementById('catList');
-  catList.innerHTML = '';
-  state.categories.forEach(c=>{
-    const chip = document.createElement('div');
-    chip.className = 'cat-chip' + (c.savings ? ' is-savings' : '');
-    const tag = c.savings ? ' (savings)' : (c.cc ? ' (card)' : '');
-    chip.innerHTML = `<span>${c.name}${tag}</span><button data-name="${c.name}" title="Remove">✕</button>`;
-    catList.appendChild(chip);
-  });
-  catList.querySelectorAll('button').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      state.categories = state.categories.filter(c => c.name !== btn.dataset.name);
-      renderSettingsPanel();
-    });
-  });
 }
 
 function renderRecurringPanel(){
@@ -875,8 +1023,8 @@ function renderRecurringPanel(){
   state.recurringTemplates.forEach(t=>{
     const chip = document.createElement('div');
     chip.className = 'cat-chip';
-    const noteText = t.note ? ' (' + t.note + ')' : '';
-    chip.innerHTML = `<span>${t.category} — ${fmtMoney(t.amount)}${noteText}, day ${t.dayOfMonth}</span><button data-id="${t.id}" title="Stop repeating">✕</button>`;
+    const noteText = t.note ? ' (' + esc(t.note) + ')' : '';
+    chip.innerHTML = '<span>' + esc(t.category) + ' — ' + fmtMoney(t.amount) + noteText + ', day ' + t.dayOfMonth + '</span><button data-id="' + t.id + '" title="Stop repeating">✕</button>';
     list.appendChild(chip);
   });
   list.querySelectorAll('button').forEach(btn=>{
@@ -888,8 +1036,9 @@ function renderRecurringPanel(){
   });
 }
 
+/* ---- Events ---- */
 document.getElementById('prevMonth').addEventListener('click', ()=>{
-  if(monthKey(currentMonth) <= monthKey(MIN_MONTH)) return;
+  if(monthKey(currentMonth) <= state.startMonth) return;
   currentMonth.setMonth(currentMonth.getMonth()-1);
   render();
 });
@@ -907,13 +1056,15 @@ document.getElementById('printBtn').addEventListener('click', ()=>{
   window.print();
 });
 
-/* ---- CSV export ---- */
+document.getElementById('bIncome').addEventListener('input', updatePlanTotals);
+
+/* CSV export */
 document.getElementById('exportCsvBtn').addEventListener('click', ()=>{
   const rows = [['Date','Category','Note','Amount']];
   entriesForMonth().slice().sort((a,b)=>a.date.localeCompare(b.date)).forEach(e=>{
     rows.push([e.date, e.category, (e.note||''), e.amount]);
   });
-  const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const csv = rows.map(r => r.map(v => '"' + String(v).replace(/"/g,'""') + '"').join(',')).join('\n');
   const blob = new Blob([csv], {type:'text/csv'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -925,7 +1076,7 @@ document.getElementById('exportCsvBtn').addEventListener('click', ()=>{
   URL.revokeObjectURL(url);
 });
 
-/* ---- CSV import ---- */
+/* CSV import */
 function parseCSV(text){
   const rows = [];
   let cur = '', row = [], inQuotes = false;
@@ -956,12 +1107,13 @@ document.getElementById('importCsvInput').addEventListener('change', (e)=>{
   if(!file){ return; }
   const reader = new FileReader();
   reader.onload = async ()=>{
-    const rows = parseCSV(reader.result);
+    const text = String(reader.result).replace(/^\uFEFF/, '');
+    const rows = parseCSV(text);
     if(rows.length === 0){ setStatus('That CSV looked empty.'); return; }
     let start = 0;
     const header = rows[0].map(h => (h||'').trim().toLowerCase());
     if(header[0] === 'date') start = 1;
-    let added = 0, skipped = 0;
+    let added = 0, skipped = 0, dupes = 0;
     for(let i = start; i < rows.length; i++){
       const r = rows[i];
       if(r.length < 4){ skipped++; continue; }
@@ -970,39 +1122,33 @@ document.getElementById('importCsvInput').addEventListener('change', (e)=>{
       const note = (r[2]||'').trim();
       const amount = parseFloat(r[3]);
       if(!/^\d{4}-\d{2}-\d{2}$/.test(date) || !categoryRaw || isNaN(amount) || amount <= 0){ skipped++; continue; }
-      let match = state.categories.find(c => c.name.toLowerCase() === categoryRaw.toLowerCase());
-      if(!match){
-        match = {name: categoryRaw, cc:false, savings:false};
-        state.categories.push(match);
-      }
+      if(date.slice(0,7) < state.startMonth){ skipped++; continue; }
+      const sub = resolveSub(categoryRaw, note);
+      if(!sub){ skipped++; continue; }
+      if(state.entries.some(x => x.date === date && x.category === sub && x.amount === amount && (x.note||'') === note)){ dupes++; continue; }
       state.entries.push({
         id: Date.now().toString(36)+Math.random().toString(36).slice(2,6)+i,
-        date, category: match.name, amount, note
+        date, category: sub, amount, note
       });
       added++;
     }
     populateCategorySelect();
+    renderPlanEditor();
     await saveState();
-    setStatus('Imported ' + added + ' entr' + (added===1?'y':'ies') + (skipped ? ', skipped ' + skipped + ' row(s).' : '.'));
     render();
+    setStatus('Imported ' + added + ' entr' + (added===1?'y':'ies') +
+      (dupes ? ', ' + dupes + ' already there' : '') +
+      (skipped ? ', skipped ' + skipped + ' row(s).' : '.'));
   };
   reader.readAsText(file);
   e.target.value = '';
 });
 
-/* ---- Backup / restore (whole app state as JSON) ---- */
-document.getElementById('downloadBackupBtn').addEventListener('click', ()=>{
-  const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'ledger-backup-' + new Date().toISOString().slice(0,10) + '.json';
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
-});
+/* Backup / restore */
+document.getElementById('downloadBackupBtn').addEventListener('click', downloadBackup);
+document.getElementById('bannerBackupBtn').addEventListener('click', downloadBackup);
 document.getElementById('restoreBackupBtn').addEventListener('click', ()=>{
+  if(!confirm('Restoring replaces everything in this ledger with the backup file. Continue?')) return;
   document.getElementById('restoreBackupInput').click();
 });
 document.getElementById('restoreBackupInput').addEventListener('change', (e)=>{
@@ -1011,11 +1157,11 @@ document.getElementById('restoreBackupInput').addEventListener('change', (e)=>{
   const reader = new FileReader();
   reader.onload = async ()=>{
     try{
-      const parsed = migrate(JSON.parse(reader.result));
-      state = parsed;
+      state = migrate(JSON.parse(reader.result));
       await saveState();
       populateCategorySelect();
-      fillBudgetInputs();
+      setDateMin();
+      renderPlanEditor();
       render();
       setStatus('Backup restored.');
     }catch(err){
@@ -1026,6 +1172,7 @@ document.getElementById('restoreBackupInput').addEventListener('change', (e)=>{
   e.target.value = '';
 });
 
+/* Add / update an entry */
 document.getElementById('addBtn').addEventListener('click', async ()=>{
   const date = document.getElementById('fDate').value;
   const category = document.getElementById('fCategory').value;
@@ -1035,14 +1182,22 @@ document.getElementById('addBtn').addEventListener('click', async ()=>{
     setStatus('Enter a date, category and an amount above zero.');
     return;
   }
+  if(date.slice(0,7) < state.startMonth){
+    setStatus('This ledger starts from ' + state.startMonth + ' — pick a date from then on.');
+    return;
+  }
+
+  const parts = date.split('-');
+  const entryMonth = new Date(parseInt(parts[0],10), parseInt(parts[1],10)-1, 1);
 
   if(editingId){
     const e = state.entries.find(e => e.id === editingId);
     if(e){ e.date = date; e.category = category; e.amount = amount; e.note = note; }
     exitEditMode();
+    currentMonth = entryMonth;
     const ok = await saveState();
-    if(ok) setStatus('');
     render();
+    if(ok) setStatus('');
     return;
   }
 
@@ -1052,7 +1207,8 @@ document.getElementById('addBtn').addEventListener('click', async ()=>{
   if(recurring){
     const template = {
       id: 'r'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),
-      category, amount, note, dayOfMonth: parseInt(date.split('-')[2], 10)
+      category, amount, note, dayOfMonth: parseInt(parts[2], 10),
+      startMonth: date.slice(0,7), skip: []
     };
     state.recurringTemplates.push(template);
     newEntry.recurringId = template.id;
@@ -1062,50 +1218,37 @@ document.getElementById('addBtn').addEventListener('click', async ()=>{
   document.getElementById('fAmount').value = '';
   document.getElementById('fNote').value = '';
   document.getElementById('fRecurring').checked = false;
-  const monthOfEntry = new Date(date);
-  currentMonth = new Date(monthOfEntry.getFullYear(), monthOfEntry.getMonth(), 1);
+  currentMonth = entryMonth;
   const ok = await saveState();
-  if(ok) setStatus('');
   render();
+  if(ok) setStatus('');
 });
 
 document.getElementById('cancelEditBtn').addEventListener('click', ()=>{
   exitEditMode();
 });
 
-document.getElementById('addCatBtn').addEventListener('click', ()=>{
-  const input = document.getElementById('newCat');
-  const savingsCheck = document.getElementById('newCatSavings');
-  const name = input.value.trim();
-  if(!name) return;
-  if(state.categories.some(c=>c.name.toLowerCase()===name.toLowerCase())) { input.value=''; return; }
-  state.categories.push({name, cc:false, savings: savingsCheck.checked});
-  input.value = '';
-  savingsCheck.checked = false;
-  populateCategorySelect();
-  renderSettingsPanel();
-});
-
-document.getElementById('saveBudgetsBtn').addEventListener('click', async ()=>{
-  state.budgets.monthly = parseFloat(document.getElementById('bMonthly').value) || 0;
-  state.budgets.savings = parseFloat(document.getElementById('bSavings').value) || 0;
-  state.budgets.expense = parseFloat(document.getElementById('bExpense').value) || 0;
-  state.budgets.creditCard = parseFloat(document.getElementById('bCreditCard').value) || 0;
-  state.budgets.rollover = document.getElementById('bRollover').checked;
+/* Plan editor actions */
+document.getElementById('savePlanBtn').addEventListener('click', async ()=>{
+  commitPlanInputs();
   const ok = await saveState();
-  setStatus(ok ? '' : 'Could not save budgets just now — try again.');
+  populateCategorySelect();
+  renderPlanEditor();
   render();
+  setStatus(ok ? 'Plan saved.' : 'Could not save the plan just now — try again.');
 });
 
 (async function init(){
   migrateProfileDataIfNeeded();
   await loadState();
-  const dateInput = document.getElementById('fDate');
-  dateInput.value = new Date().toISOString().slice(0,10);
-  dateInput.min = monthKey(MIN_MONTH) + '-01';
+  const warning = loadProblem ? document.getElementById('statusNote').textContent : '';
+  await saveState();
+  document.getElementById('fDate').value = todayStr();
+  setDateMin();
   populateCategorySelect();
-  fillBudgetInputs();
+  renderPlanEditor();
   render();
+  if(warning) setStatus(warning);
 })();
 </script>
 </body>
