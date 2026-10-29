@@ -240,6 +240,14 @@ details[open] summary::before{content:"– ";}
   font-family:'IBM Plex Mono', monospace;display:flex;align-items:center;gap:6px;
 }
 .cat-chip button{background:none;border:none;color:var(--rule-red);cursor:pointer;font-size:12px;padding:0;}
+.sub-group{margin-bottom:14px;}
+.sub-group-title{font-size:12px;font-weight:600;color:var(--ink-soft);margin-bottom:4px;}
+.sub-group .cat-list{margin:4px 0 8px;}
+.cat-chip button.ren{color:var(--ink-soft);}
+.sub-add{display:flex;gap:8px;}
+.sub-add input{flex:1;min-width:0;}
+.sub-add button{border:1px solid var(--ink);background:none;color:var(--ink);cursor:pointer;font-family:'Source Serif 4', serif;font-size:12.5px;padding:0 12px;}
+.sub-add button:hover{background:var(--ink);color:var(--paper-light);}
 .status-note{font-size:11px;color:var(--ink-soft);margin-top:16px;padding:0 18px 0 8px;}
 
 @media print{
@@ -410,6 +418,16 @@ details[open] summary::before{content:"– ";}
 
   <section class="no-print">
     <details>
+      <summary>Manage sub-categories</summary>
+      <div class="settings-body">
+        <div class="section-note">Add your own tags under any main category. They appear in the Daily expense log dropdown and count toward their main category. Rename (✎) updates your old entries too. A tag that has entries cannot be removed, rename it instead.</div>
+        <div id="subManager"></div>
+      </div>
+    </details>
+  </section>
+
+  <section class="no-print">
+    <details>
       <summary>Backup &amp; restore</summary>
       <div class="settings-body">
         <div class="section-note">Your data lives in this browser only. Download a backup now and then to keep a copy, or move it to another device.</div>
@@ -437,8 +455,31 @@ const GROUPS = [
   {key:'short',      name:'Short-term savings', kind:'savings', subs:['RD','Gold','Chit']},
   {key:'long',       name:'Long-term savings',  kind:'savings', subs:['SIP','Emergency fund']}
 ];
+const DEFAULT_SUBS = {};
+GROUPS.forEach(g => { DEFAULT_SUBS[g.key] = g.subs.slice(); });
 const ALL_SUBS = [];
-GROUPS.forEach(g => g.subs.forEach(s => ALL_SUBS.push({name:s, group:g.key})));
+/* Load the sub-category lists (default or the user's own) into GROUPS and ALL_SUBS */
+function applySubs(map){
+  ALL_SUBS.length = 0;
+  GROUPS.forEach(g => {
+    const list = map && Array.isArray(map[g.key]) && map[g.key].length ? map[g.key] : DEFAULT_SUBS[g.key];
+    g.subs = list.slice();
+    g.subs.forEach(n => ALL_SUBS.push({name:n, group:g.key}));
+  });
+}
+function cleanSubs(raw){
+  const out = {}, seen = new Set(GROUPS.map(g => g.name.toLowerCase()));
+  GROUPS.forEach(g => {
+    const list = [];
+    (raw && Array.isArray(raw[g.key]) ? raw[g.key] : []).forEach(n => {
+      n = String(n || '').trim().slice(0,30);
+      if(n && !seen.has(n.toLowerCase())){ seen.add(n.toLowerCase()); list.push(n); }
+    });
+    out[g.key] = list.length ? list : DEFAULT_SUBS[g.key].slice();
+  });
+  return out;
+}
+applySubs(null);
 
 const DEFAULT_STATE = {
   planVersion: 4,
@@ -580,6 +621,9 @@ function migrate(raw){
   if(!Array.isArray(s.entries)) s.entries = [];
   if(!Array.isArray(s.recurringTemplates)) s.recurringTemplates = [];
   s.entries = s.entries.filter(e => e && typeof e.date === 'string' && e.date.length >= 10);
+
+  s.subs = cleanSubs(s.subs);
+  applySubs(s.subs);
 
   // Every entry and recurring item ends up on a sub-category (safe to run again)
   s.entries.forEach(fixSub);
@@ -755,7 +799,7 @@ function renderPlanEditor(){
     const g = groupByKey(c.group);
     const row = document.createElement('div');
     row.className = 'plan-row';
-    row.innerHTML = '<span class="plan-name">' + esc(c.name) + '<small>' + esc(g ? g.subs.join(', ') : '') + '</small></span>' +
+    row.innerHTML = '<span class="plan-name">' + esc(c.name) + '<small data-g="' + esc(c.group) + '">' + esc(g ? g.subs.join(', ') : '') + '</small></span>' +
       '<input type="number" class="plan-limit" min="0" step="1" data-name="' + esc(c.name) + '" value="' + c.limit + '">';
     host.appendChild(row);
   });
@@ -1036,6 +1080,80 @@ function renderRecurringPanel(){
   });
 }
 
+/* ---- Manage sub-categories ---- */
+function subNameTaken(name, except){
+  const low = name.toLowerCase();
+  if(except && except.toLowerCase() === low) return false;
+  return ALL_SUBS.some(x => x.name.toLowerCase() === low) || GROUPS.some(g => g.name.toLowerCase() === low);
+}
+function renderSubManager(){
+  const host = document.getElementById('subManager');
+  host.innerHTML = '';
+  GROUPS.forEach(g => {
+    const main = state.categories.find(c => c.group === g.key);
+    const box = document.createElement('div');
+    box.className = 'sub-group';
+    let chips = '';
+    g.subs.forEach(n => {
+      chips += '<div class="cat-chip"><span>' + esc(n) + '</span>' +
+        '<button class="ren" data-act="ren" data-g="' + g.key + '" data-n="' + esc(n) + '" title="Rename">✎</button>' +
+        '<button data-act="del" data-g="' + g.key + '" data-n="' + esc(n) + '" title="Remove">✕</button></div>';
+    });
+    box.innerHTML = '<div class="sub-group-title">' + esc(main ? main.name : g.name) + '</div>' +
+      '<div class="cat-list">' + chips + '</div>' +
+      '<div class="sub-add"><input type="text" maxlength="30" id="subIn-' + g.key + '" placeholder="New tag name">' +
+      '<button data-act="add" data-g="' + g.key + '">Add</button></div>';
+    host.appendChild(box);
+  });
+}
+function refreshPlanSubs(){
+  document.querySelectorAll('#planEditor small[data-g]').forEach(el => {
+    const g = groupByKey(el.dataset.g);
+    el.textContent = g ? g.subs.join(', ') : '';
+  });
+}
+async function afterSubChange(msg){
+  applySubs(state.subs);
+  const ok = await saveState();
+  populateCategorySelect();
+  refreshPlanSubs();
+  render();
+  renderSubManager();
+  if(ok) setStatus(msg);
+}
+document.getElementById('subManager').addEventListener('click', async (ev)=>{
+  const btn = ev.target.closest('button[data-act]');
+  if(!btn) return;
+  const gk = btn.dataset.g, n = btn.dataset.n, act = btn.dataset.act;
+  const list = state.subs[gk];
+  if(act === 'add'){
+    const inp = document.getElementById('subIn-' + gk);
+    const name = inp.value.trim().slice(0,30);
+    if(!name){ setStatus('Type a tag name first.'); return; }
+    if(subNameTaken(name)){ setStatus('That name is already used. Pick a different one.'); return; }
+    list.push(name);
+    await afterSubChange('Added "' + name + '".');
+  }else if(act === 'ren'){
+    const input = prompt('Rename "' + n + '" to:', n);
+    if(input === null) return;
+    const name = input.trim().slice(0,30);
+    if(!name || name === n) return;
+    if(subNameTaken(name, n)){ setStatus('That name is already used. Pick a different one.'); return; }
+    list[list.indexOf(n)] = name;
+    state.entries.forEach(e => { if(e.category === n) e.category = name; });
+    state.recurringTemplates.forEach(t => { if(t.category === n) t.category = name; });
+    await afterSubChange('Renamed to "' + name + '".');
+  }else if(act === 'del'){
+    const used = state.entries.filter(e => e.category === n).length +
+                 state.recurringTemplates.filter(t => t.category === n).length;
+    if(used){ setStatus('"' + n + '" has ' + used + ' entr' + (used === 1 ? 'y' : 'ies') + ' or repeat item(s). Rename it instead, or edit those entries first.'); return; }
+    if(list.length <= 1){ setStatus('Each main category needs at least one tag.'); return; }
+    if(!confirm('Remove the tag "' + n + '"?')) return;
+    list.splice(list.indexOf(n), 1);
+    await afterSubChange('Removed "' + n + '".');
+  }
+});
+
 /* ---- Events ---- */
 document.getElementById('prevMonth').addEventListener('click', ()=>{
   if(monthKey(currentMonth) <= state.startMonth) return;
@@ -1162,6 +1280,7 @@ document.getElementById('restoreBackupInput').addEventListener('change', (e)=>{
       populateCategorySelect();
       setDateMin();
       renderPlanEditor();
+      renderSubManager();
       render();
       setStatus('Backup restored.');
     }catch(err){
@@ -1247,6 +1366,7 @@ document.getElementById('savePlanBtn').addEventListener('click', async ()=>{
   setDateMin();
   populateCategorySelect();
   renderPlanEditor();
+  renderSubManager();
   render();
   if(warning) setStatus(warning);
 })();
